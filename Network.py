@@ -30,7 +30,9 @@ class CorpusGraph:
         self.corpus_io.save_as_json(json_obj, path)
 
     def load_from_json(self, path='./data/corpus.json'):
+        print("loading corpus json file")
         json_obj = self.corpus_io.load_as_json(path)
+        print("loaded")
         self.corpus = nx.from_dict_of_dicts(json_obj, create_using=self.corpus)
 
     def get_edge_weight(self, start, end):

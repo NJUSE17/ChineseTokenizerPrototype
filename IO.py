@@ -6,10 +6,11 @@ import json
 
 class CorpusIO:
     def __init__(self):
-        self.db = MongoClient('localhost', 27017).get_database('chinese').get_collection('train_edges')
+        self.db = None
 
     def read_from_mongo(self, limit=20):
-        cursor = self.db.find({})
+        db = self.db if self.db is not None else MongoClient('localhost', 27017).get_database('chinese').get_collection('train_edges')
+        cursor = db.find({})
         cnt = 0
         for doc in cursor:
             if limit is not None and cnt > limit:
@@ -23,7 +24,7 @@ class CorpusIO:
     def save_as_json(self, corpus_json, path):
         file = open(path, 'w', encoding='utf-8')
         # pickle.dump(corpus_json, file)
-        json.dump(corpus_json, file)
+        json.dump(corpus_json, file, ensure_ascii=False)
         print('corpus network saved to %s' % path)
 
     def load_as_json(self, path):

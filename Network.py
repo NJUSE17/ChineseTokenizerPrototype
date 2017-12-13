@@ -11,6 +11,7 @@ class CorpusGraph:
         self.corpus = nx.DiGraph()
         self.corpus_io = CorpusIO()
 
+    # 需要mongodb
     def build_corpus(self):
         edges_gen = self.corpus_io.read_from_mongo(limit=None)
         for edge in edges_gen:
@@ -21,16 +22,16 @@ class CorpusGraph:
         plt.show()
 
     def to_json(self):
-        json = nx.to_dict_of_dicts(self.corpus)
-        return json
+        json_obj = nx.to_dict_of_dicts(self.corpus)
+        return json_obj
 
     def save_as_json(self, path='./data/corpus.json'):
-        json = self.to_json()
-        self.corpus_io.save_as_json(json, path)
+        json_obj = self.to_json()
+        self.corpus_io.save_as_json(json_obj, path)
 
     def load_from_json(self, path='./data/corpus.json'):
-        json = self.corpus_io.load_as_json(path)
-        self.corpus = nx.from_dict_of_dicts(json, create_using=self.corpus)
+        json_obj = self.corpus_io.load_as_json(path)
+        self.corpus = nx.from_dict_of_dicts(json_obj, create_using=self.corpus)
 
     def get_edge_weight(self, start, end):
         weight = 0
@@ -47,11 +48,15 @@ class CorpusGraph:
         nbr = self.corpus.adj[key]
         rs = []
         # print(nbr)
-        # ###########只需要获得前K个最大值，这里的排序可以优化####################
+        # ########### 只需要获得前K个最大值，这里的排序可以优化(堆排序/K次冒泡排序...) ####################
         sorted_nbr = sorted(nbr.items(), key=lambda item: item[1]['weight'], reverse=True)
 
         j = 0
         for i in range(K - 1):
+            if j >= len(sorted_nbr):
+                break
+
+            # 循环K次，如果相邻字正好是下一个字，则跳过这个相邻字
             if sorted_nbr[j][0] == exclude:
                 j += 1
             rs.append((sorted_nbr[j][0], sorted_nbr[j][1]['weight']))

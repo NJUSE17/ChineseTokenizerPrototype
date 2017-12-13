@@ -2,25 +2,19 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link href="./style.css" rel="stylesheet">
+    <link href="./bootstrap.min.css" rel="stylesheet">
     <title>Title</title>
-    <style>
-			body {
-				font-family: Monospace;
-				background-color: #f0f0f0;
-				margin: 0px;
-				overflow: hidden;
-			}
-			#info {
-				position: absolute;
-				top: 10px;
-				width: 100%;
-				text-align: center;
-			}
-    </style>
 </head>
 <body>
-<h2 style="position: fixed">鼠标左键-旋转；右键-平移；滚轮-缩放</h2>
 <!--<div id="canvas-frame" style="width: 100vw; height: 100vh"></div>-->
+<!--<h2>鼠标左键-旋转；右键-平移；滚轮-缩放</h2>-->
+<div id="tool" class="input-group">
+    <input class="form-control" placeholder="输入待分词句子" type="text" id="sentence-input">
+    <div class="input-group-btn">
+        <button class="btn btn-primary" type="button" id="submit-btn">提交</button>
+    </div>
+</div>
 <div id="info">
     <!--<a href="http://threejs.org" target="_blank" rel="noopener">three.js</a> webgl - Simple text from json fonts.-->
 </div>
@@ -30,6 +24,9 @@
 <script src="./engine.js"></script>
 <script>
     //threeStart();
+
+
+
 
 
 </script>

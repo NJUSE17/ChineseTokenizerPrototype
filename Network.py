@@ -125,8 +125,13 @@ class TextGraph:
             nbr = corpus.get_sorted_neighbour(start_char, end_char)
             text_json[i] = {"char": start_char, "outWeight": out_weight, "neighbour": nbr}
             i += 1
-        json.dump(text_json, open(path, 'w', encoding='utf-8'), ensure_ascii=False, indent=4)
-        print("text json ready at: " + path)
+
+        if path is not None:
+            json.dump(text_json, open(path, 'w', encoding='utf-8'), ensure_ascii=False, indent=4)
+            print("text json ready at: " + path)
+
+        return text_json
+
 
     def draw(self):
         # nx.draw_networkx(self.text, font_family='SimHei', node_color='white')

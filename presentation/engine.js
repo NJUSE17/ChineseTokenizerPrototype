@@ -17,10 +17,6 @@ function init( ) {
     camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 10000 );
     camera.position.set( -50, 200, 50 );
 
-    var controls = new THREE.OrbitControls( camera );
-    controls.target.set( 0, 200, 0 );
-    controls.update();
-
     scene = new THREE.Scene();
     scene.background = new THREE.Color( 0xf0f0f0 );
 //    scene.background = new THREE.Color( 0x000000 );
@@ -28,34 +24,38 @@ function init( ) {
     setLines();
 
     // 加载json
-    var xhr;
-    if(window.XMLHttpRequest){
-        xhr = new XMLHttpRequest();
-    }else if(window.ActiveXObject){
-        xhr = new window.ActiveXObject();
-    }else{
-        alert("请升级至最新版本的浏览器");
-    }
-    if(xhr !=null){
-        xhr.open("GET","../data/text.json",true);
-        xhr.send(null);
-        xhr.onreadystatechange=function(){
-            if(xhr.readyState==4&&xhr.status==200){
-                var obj = JSON.parse(xhr.responseText);
-                loadTextGraph(obj);
-
-            }
-        };
-
-    }
+//    var xhr;
+//    if(window.XMLHttpRequest){
+//        xhr = new XMLHttpRequest();
+//    }else if(window.ActiveXObject){
+//        xhr = new window.ActiveXObject();
+//    }else{
+//        alert("请升级至最新版本的浏览器");
+//    }
+//    if(xhr !=null){
+//        xhr.open("GET","/tokenize-result",true);
+//        xhr.send(null);
+//        xhr.onreadystatechange=function(){
+//            if(xhr.readyState==4&&xhr.status==200){
+//                var obj = JSON.parse(xhr.responseText);
+//                loadTextGraph(obj);
+//
+//            }
+//        };
+//
+//    }
 
 
     renderer = new THREE.WebGLRenderer( { antialias: true } );
     renderer.setPixelRatio( window.devicePixelRatio );
     renderer.setSize( window.innerWidth, window.innerHeight );
-    document.body.appendChild( renderer.domElement );
+    document.getElementById("space").appendChild( renderer.domElement );
     window.addEventListener( 'resize', onWindowResize, false );
 
+
+    var controls = new THREE.OrbitControls( camera, renderer.domElement );
+    controls.target.set( 0, 200, 0 );
+    controls.update();
 } // end init
 
 var allChars = [];

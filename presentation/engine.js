@@ -59,6 +59,7 @@ function init( ) {
 } // end init
 
 var allChars = [];
+var allLinks = []
 function loadTextGraph(textJson){
 var texts = textJson;
 var loader = new THREE.FontLoader();
@@ -109,7 +110,7 @@ var loader = new THREE.FontLoader();
             i ++;
             var currentChar = current['char'];
             var nbrs = current['neighbour'];
-            console.log(currentChar)
+//            console.log(currentChar)
 
             var charX = i*6*FONT_SIZE;
             var charObj = makeChar(currentChar, matDark, FONT_SIZE, charX, LINK_HEIGHT)
@@ -120,6 +121,7 @@ var loader = new THREE.FontLoader();
                 var charLinkObj = makeLink(previous.x, previous.y, previous.z, charX, LINK_HEIGHT, 0);
                 var charWeightObj = makeChar(previous.weight, matDark, FONT_SIZE/3.0, (previous.x+charX)/2.0, LINK_HEIGHT, 0);
                 scene.add(charLinkObj);
+                allLinks.push(charLinkObj);
                 scene.add(charWeightObj);
                 allChars.push(charWeightObj);
             }
@@ -127,18 +129,18 @@ var loader = new THREE.FontLoader();
 
             var r = 3*FONT_SIZE;
             var interval =Math.PI * 2 / nbrs.length;
-            console.log("#########")
             for(var j=0;j<nbrs.length;j++){
-                console.log(nbrs[j][0]);
+//                console.log(nbrs[j][0]);
                 var z = r * Math.cos(j*interval);
                 var y = r * Math.sin(j*interval) + LINK_HEIGHT;
-                console.log(j*interval+" "+nbrs[j][0]+ ":"+z+","+y);
+//                console.log(j*interval+" "+nbrs[j][0]+ ":"+z+","+y);
                 var nbrObj = makeChar(nbrs[j][0], matLite, FONT_SIZE_NBR, charObj.position.x, y, z);
                 scene.add(nbrObj);
                 allChars.push(nbrObj);
 
                 var linkNbrObj = makeLink(charObj.position.x, charObj.position.y, charObj.position.z, charObj.position.x, y, z);
                 scene.add(linkNbrObj);
+                allLinks.push(linkNbrObj);
 
                 var weightNbrObj = makeChar(nbrs[j][1], matLite, FONT_SIZE_NBR/3.0, charObj.position.x, (charObj.position.y+y)/2.0, (charObj.position.z+z)/2.0);
                 scene.add(weightNbrObj);
@@ -168,6 +170,16 @@ function setLines(){
         line.rotation.y = 90 * Math.PI / 180; //  旋转90度
         scene.add( line );
 //将p1p2这条线先围绕y轴旋转90度，然后再复制20份，平行于z轴移动到不同的位置，也能形成一组平行线。
+    }
+}
+
+function clearGraph(){
+    for(obj in allChars){
+        scene.remove(obj);
+    }
+
+    for(obj in allLinks){
+        scene.remove(obj);
     }
 }
 

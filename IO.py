@@ -9,7 +9,7 @@ class CorpusIO:
         self.db = None
 
     def read_from_mongo(self, limit=20):
-        db = self.db if self.db is not None else MongoClient('localhost', 27017).get_database('chinese').get_collection('train_edges')
+        db = self.db if self.db is not None else MongoClient('localhost', 27017).get_database('judgement').get_collection('train_edges')
         cursor = db.find({})
         cnt = 0
         for doc in cursor:

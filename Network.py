@@ -84,6 +84,9 @@ class TextGraph:
         self.id_char_map = {}
         self.sentence_cnt = 0
 
+        # 每句话的开头
+        self.headers = []
+
     def get_sentences(self, isRandom=True):
         ss = self.text_io.get_text_from_mongo(isRandom=isRandom)
         return ss
@@ -94,10 +97,15 @@ class TextGraph:
         for s in sentences:
             s = s.strip()
             s_size = len(s)
+            is_header = True
             for char_index in range(s_size):
                 char = s[char_index]
                 id = sentence_index + char_index
                 self.text.add_node(id)
+                if is_header:
+                    self.headers.append(id)
+                    is_header = False
+
                 self.id_char_map[id] = char
                 if char_index < s_size - 1:
                     self.text.add_edge(id, id + 1)
@@ -131,6 +139,44 @@ class TextGraph:
             print("text json ready at: " + path)
 
         return text_json
+
+    def cut(self):
+        adj = self.text.adj
+        rs = []
+        for header in self.headers:
+            current = header
+            # next_weight = 0
+            pre_weight = 0
+            buffer_word = ""
+            words = []
+            while current in adj:
+                current_char = self.id_char_map[current]
+                print("=>"+current_char)
+                current_weight = self.text[current][current+1]['weight'] if current+1 in adj else 0
+                # next_weight = self.text[current+1][current+2]['weight']
+                # if pre_weight is not None:
+                if current_weight == 0:
+                    buffer_word += current_char
+                    words.append(buffer_word)
+                    buffer_word = ""
+                else:
+                    diff = (pre_weight-current_weight+0.0)/current_weight if pre_weight > current_weight else (current_weight - pre_weight + 0.0)/current_weight
+                    if diff > 0.3 and pre_weight != 0:
+                        buffer_word += current_char
+                        words.append(buffer_word)
+                        buffer_word = ""
+                    else:
+                        buffer_word += current_char
+                    print(diff)
+                print("%f\t\t\tbuffer:%s" % (current_weight, buffer_word))
+                # else:
+                #     buffer_word = current_char
+                pre_weight = current_weight
+                current += 1
+            print(words)
+            rs.append(words)
+        return rs
+
 
 
     def draw(self):

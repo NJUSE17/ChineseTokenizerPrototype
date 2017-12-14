@@ -12,5 +12,32 @@ body {
 }
 
 #tool {
-    max-width: 500px;
+    min-width: 300px;
+}
+
+.char-active{
+    font-weight: 900;
+    background-color: #fa4444;
+    color: white
+}
+
+.char{
+    padding: 0 3px;
+    border-radius: 2px;
+    margin-right: 5px;
+}
+
+.word{
+    margin-right: 5px;
+    background-color: #fa4444;
+    color: white
+}
+
+.refer{
+    margin-right: 5px;
+}
+
+.plain{
+    overflow-x: auto;
+    overflow-y: hidden;
 }

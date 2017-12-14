@@ -162,6 +162,8 @@ function setLines(){
 
         var line = new THREE.Line( geometry, new THREE.LineBasicMaterial( { color: 0xaaaaaa, opacity: 0.1} ) );
         line.position.z = ( i * 20 ) - 500;
+        line.matrixAutoUpdate  = false;
+        line.updateMatrix();
         scene.add( line );
 
         var line = new THREE.Line( geometry, new THREE.LineBasicMaterial( { color: 0xaaaaaa, opacity: 0.1 } ) );
@@ -174,13 +176,17 @@ function setLines(){
 }
 
 function clearGraph(){
-    for(obj in allChars){
+    var buffer = allChars;
+    allChars = [];
+    buffer.forEach(function(obj){
         scene.remove(obj);
-    }
+    });
 
-    for(obj in allLinks){
+    buffer = allLinks;
+    allLinks = [];
+    buffer.forEach(function(obj){
         scene.remove(obj);
-    }
+    });
 }
 
 

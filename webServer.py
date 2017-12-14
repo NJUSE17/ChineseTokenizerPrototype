@@ -7,10 +7,14 @@ import json
 # from cgi import parse_qs, escape
 from urllib.parse import parse_qs
 
-
+from ResultReference import JiebaChecker
 
 cg = CorpusGraph()
 cg.load_from_json()
+
+checker = JiebaChecker()
+
+
 def content_type(path):
     if path.endswith(".css"):
         return "text/css"
@@ -38,7 +42,14 @@ def app(environ, start_response):
         sentences = parsed_query["sentence"]
         tg.build(sentences)
         tg.fill_edge(cg)
-        res = json.dumps(tg.make_json(cg,path=None), ensure_ascii=False)
+
+        # 暂时只对单句分词，所以取数组第一个元素
+        result = tg.cut()[0]
+        check = checker.check(sentences[0], result)
+
+        jieba_result = check["jieba_result"]
+        overlap = check["overlap"]
+        res = json.dumps({"graph": tg.make_json(cg, path=None), "result": result, "jieba": jieba_result, "overlap": overlap}, ensure_ascii=False)
         print(res)
         start_response("200 OK", [("Content-Type", "application/json")])
         return [res.encode('utf-8')]

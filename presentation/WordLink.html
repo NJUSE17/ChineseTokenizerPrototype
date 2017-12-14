@@ -5,15 +5,34 @@
     <link href="/style.css" rel="stylesheet">
     <link href="/bootstrap.min.css" rel="stylesheet">
     <script src="/jquery.min.js"></script>
+    <script src="/vue.js"></script>
     <title>Title</title>
 </head>
 <body>
 <!--<div id="canvas-frame" style="width: 100vw; height: 100vh"></div>-->
 <!--<h2>鼠标左键-旋转；右键-平移；滚轮-缩放</h2>-->
-<div id="tool" class="input-group">
-    <input class="form-control" placeholder="输入待分词句子" type="text" id="sentence-input">
-    <div class="input-group-btn">
-        <button class="btn btn-primary" onclick="onSubmit();" type="button" id="submit-btn">提交</button>
+<div id="control-panel" class="row">
+    <div class="col-xs-4">
+        <div id="tool" class="input-group">
+            <input class="form-control" placeholder="输入待分词句子" type="text" id="sentence-input">
+            <div class="input-group-btn">
+                <button class="btn btn-primary" onclick="onSubmit();" type="button" id="submit-btn">提交</button>
+            </div>
+        </div>
+
+        <h5 class="plain">
+            <small>分词结果</small>
+            <span class="word" v-for="word in words">{{word}}</span>
+        </h5>
+        <h5 class="plain">
+            <small>参考结果</small>
+            <span class="refer" v-for="refer in references">{{refer}}</span>
+        </h5>
+    </div>
+    <div class="col-xs-8">
+        <h3>
+            <span class="char" v-for="char in chars" @click="select(char)" :class="{'char-active': char.isActive}">{{char.value}}</span>
+        </h3>
     </div>
 </div>
 <div id="space">
@@ -24,7 +43,23 @@
 <script src="/OrbitControls.js"></script>
 <script src="/engine.js"></script>
 <script>
-    //threeStart();
+    var controller = new Vue({
+        el: "#control-panel",
+        data: {
+            chars: [],
+            words: [],
+            references: [],
+            overlap: "N/A"
+        },
+        methods: {
+            select: function(char){
+                this.chars.forEach(function(char){
+                    char.isActive = false;
+                });
+                char.isActive = true;
+            }
+        }
+    })
 
     function onSubmit(){
         var sentence = $("#sentence-input").val();
@@ -36,7 +71,16 @@
             type: 'GET',
             success: function(res){
                 clearGraph();
-                loadTextGraph(res);
+                var jieba = res.jieba;
+                var words = res.result;
+                var overlap = res.overlap;
+                console.log(jieba);
+                console.log(words);
+                console.log(overlap);
+                controller.chars = sentence.split("").map(function(char){return {value: char, isActive: false}});
+                controller.references = jieba;
+                controller.words = words;
+                loadTextGraph(res.graph);
             },
             error: function(res){
                 console.error(res);

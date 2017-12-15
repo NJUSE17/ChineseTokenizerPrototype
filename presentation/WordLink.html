@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link href="/bootstrap.css" rel="stylesheet">
     <link href="/style.css" rel="stylesheet">
-    <link href="/bootstrap.min.css" rel="stylesheet">
     <script src="/jquery.min.js"></script>
     <script src="/vue.js"></script>
     <title>Title</title>
@@ -11,30 +11,36 @@
 <body>
 <!--<div id="canvas-frame" style="width: 100vw; height: 100vh"></div>-->
 <!--<h2>鼠标左键-旋转；右键-平移；滚轮-缩放</h2>-->
-<div id="control-panel" class="row">
+<div id="control-panel">
+    <div class="row">
     <div class="col-xs-4">
         <div id="tool" class="input-group">
             <input class="form-control" placeholder="输入待分词句子" type="text" id="sentence-input">
             <div class="input-group-btn">
-                <button class="btn btn-primary" onclick="onSubmit();" type="button" id="submit-btn">提交</button>
+                <button @keyup.enter="onSubmit();" class="btn btn-primary" onclick="onSubmit();" type="button" id="submit-btn">提交</button>
             </div>
         </div>
-
-        <h5 class="plain">
-            <small>分词结果</small>
-            <span class="word" v-for="word in words">{{word}}</span>
-        </h5>
-        <h5 class="plain">
-            <small>参考结果</small>
-            <span class="refer" v-for="refer in references">{{refer}}</span>
-        </h5>
     </div>
     <div class="col-xs-8">
-        <h3>
-            <span class="char" v-for="char in chars" @click="select(char)" :class="{'char-active': char.isActive}">{{char.value}}</span>
-        </h3>
+
+        <h4 class="plain">
+            <small>分词结果</small>
+            <span class="label label-default word" v-for="word in words">{{word}}</span>
+        </h4>
+        <h4 class="plain">
+            <small>参考结果</small>
+            <span class="label label-success refer" v-for="refer in references">{{refer}}</span>
+        </h4>
     </div>
 </div>
+        <h3 id="chars">
+            <span class="label label-primary char" v-for="char in chars" @click="select(char)" :class="{'char-active': char.isActive}">
+                {{char.value}}
+            </span>
+        </h3>
+</div>
+
+
 <div id="space">
     <!--<a href="http://threejs.org" target="_blank" rel="noopener">three.js</a> webgl - Simple text from json fonts.-->
 </div>

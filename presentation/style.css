@@ -1,5 +1,5 @@
 body {
-    font-family: Monospace;
+
     background-color: #f0f0f0;
     margin: 0px;
     overflow: hidden;
@@ -21,20 +21,28 @@ body {
     color: white
 }
 
+.chars{
+    margin: 0;
+}
+
 .char{
-    padding: 0 3px;
-    border-radius: 2px;
-    margin-right: 5px;
+    margin-left: 0.3em;
+    font-size: 0.8em;
+}
+.char:hover{
+    cursor: pointer;
 }
 
 .word{
-    margin-right: 5px;
-    background-color: #fa4444;
-    color: white
+    margin-right: 0.3em;
+    font-size: 1em;
+    display: inline-block;
 }
 
 .refer{
-    margin-right: 5px;
+    margin-right: 0.3em;
+    font-size: 1em;
+    display: inline-block;
 }
 
 .plain{

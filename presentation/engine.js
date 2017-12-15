@@ -14,7 +14,7 @@ init();
 animate();
 
 function init( ) {
-    camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 10000 );
+    camera = new THREE.PerspectiveCamera( 45, window.innerWidth / (window.innerHeight-100), 1, 10000 );
     camera.position.set( -50, 200, 50 );
 
     scene = new THREE.Scene();

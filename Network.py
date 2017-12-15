@@ -94,6 +94,9 @@ class TextGraph:
 
     def build(self, sentences):
         sentence_index = 10000
+        # print(type(['asdf','asdf']))
+        if type(sentences) != list:
+            raise Exception("输入应是句子列表")
         for s in sentences:
             s = s.strip()
             s_size = len(s)
@@ -156,24 +159,25 @@ class TextGraph:
                 # next_weight = self.text[current+1][current+2]['weight']
                 # if pre_weight is not None:
                 if current_weight == 0:
-                    buffer_word += current_char
+                    print("+ cut")
+                    buffer_word += str(current_char)
                     words.append(buffer_word)
                     buffer_word = ""
                 else:
                     diff = (pre_weight-current_weight+0.0)/current_weight if pre_weight > current_weight else (current_weight - pre_weight + 0.0)/current_weight
                     if diff > 0.3 and pre_weight != 0:
-                        buffer_word += current_char
+                        buffer_word += str(current_char)
                         words.append(buffer_word)
                         buffer_word = ""
                     else:
-                        buffer_word += current_char
+                        buffer_word += str(current_char)
                     print(diff)
-                print("%f\t\t\tbuffer:%s" % (current_weight, buffer_word))
+                print("%f\t\t\tbuffer:%s |" % (current_weight, buffer_word))
                 # else:
                 #     buffer_word = current_char
                 pre_weight = current_weight
                 current += 1
-            print(words)
+                print(words)
             rs.append(words)
         return rs
 

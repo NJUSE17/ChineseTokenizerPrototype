@@ -1,5 +1,4 @@
 from pymongo import MongoClient
-import pickle
 import random
 import json
 
@@ -8,8 +7,10 @@ class CorpusIO:
     def __init__(self):
         self.db = None
 
+    # 从数据库构造语料库
     def read_from_mongo(self, limit=20):
-        db = self.db if self.db is not None else MongoClient('localhost', 27017).get_database('judgement').get_collection('train_edges')
+        db = self.db if self.db is not None else MongoClient('localhost', 27017).get_database(
+            'judgement').get_collection('train_edges')
         cursor = db.find({})
         cnt = 0
         for doc in cursor:
@@ -23,13 +24,11 @@ class CorpusIO:
 
     def save_as_json(self, corpus_json, path):
         file = open(path, 'w', encoding='utf-8')
-        # pickle.dump(corpus_json, file)
         json.dump(corpus_json, file, ensure_ascii=False)
         print('corpus network saved to %s' % path)
 
     def load_as_json(self, path):
         file = open(path, 'r', encoding='utf-8')
-        # json = pickle.load(file, encoding='utf-8')
         corpus_json = json.load(file)
         return corpus_json
 
@@ -51,5 +50,3 @@ class TextIO:
         cursor = self.db.find().skip(skip).limit(limit)
         for doc in cursor:
             yield doc['text']
-
-

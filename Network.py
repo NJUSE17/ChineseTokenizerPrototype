@@ -3,7 +3,6 @@ import json
 from IO import CorpusIO
 from IO import TextIO
 import networkx as nx
-import matplotlib.pyplot as plt
 
 
 class CorpusGraph:
@@ -17,18 +16,17 @@ class CorpusGraph:
         for edge in edges_gen:
             self.corpus.add_edge(edge[0], edge[1], weight=edge[2])
 
-    def draw(self):
-        nx.draw_networkx(self.corpus, font_family='SimHei', node_color='white')
-        plt.show()
-
+    # 将语料库的networkx实例转为json
     def to_json(self):
         json_obj = nx.to_dict_of_dicts(self.corpus)
         return json_obj
 
+    # 将语料库的networkx实例存入硬盘，以json文件的形式
     def save_as_json(self, path='./data/corpus.json'):
         json_obj = self.to_json()
         self.corpus_io.save_as_json(json_obj, path)
 
+    # 从json文件读取一个networkx的语料库实例
     def load_from_json(self, path='./data/corpus.json'):
         print("loading corpus json file")
         json_obj = self.corpus_io.load_as_json(path)
@@ -43,6 +41,7 @@ class CorpusGraph:
             pass
         return weight
 
+    # 对于给定的字（key），取前K个最大的后接字
     def get_sorted_neighbour(self, key, exclude=None, K=6):
         if key not in self.corpus.adj:
             return []
@@ -90,11 +89,9 @@ class TextGraph:
     def get_sentences(self, isRandom=True):
         ss = self.text_io.get_text_from_mongo(isRandom=isRandom)
         return ss
-        # self.build(ss)
 
     def build(self, sentences):
         sentence_index = 10000
-        # print(type(['asdf','asdf']))
         if type(sentences) != list:
             raise Exception("输入应是句子列表")
         for s in sentences:
@@ -121,11 +118,8 @@ class TextGraph:
             char_end = self.id_char_map[edge[1]]
             weight = corpus.get_edge_weight(char_start, char_end)
             self.text[edge[0]][edge[1]]['weight'] = weight
-            # print(char_start, char_end, weight)
-            # print(edges)
 
     def make_json(self, corpus, path='./data/text.json'):
-        # edges = self.text.edges()
         text_json = {}
         i = 0
         for start_id, nbr in self.text.adj.items():
@@ -143,27 +137,29 @@ class TextGraph:
 
         return text_json
 
+    # 按照阈值切边分词
     def cut(self):
         adj = self.text.adj
         rs = []
         for header in self.headers:
             current = header
-            # next_weight = 0
             pre_weight = 0
             buffer_word = ""
             words = []
             while current in adj:
                 current_char = self.id_char_map[current]
-                print("=>" + current_char)
+                # print("=>" + current_char)
+
+                # 当前字出边的权重
                 current_weight = self.text[current][current + 1]['weight'] if current + 1 in adj else 0
-                # next_weight = self.text[current+1][current+2]['weight']
-                # if pre_weight is not None:
+
+                # 当前字出边权重为0，说明当前字是词尾
                 if current_weight == 0:
-                    print("+ cut")
                     buffer_word += str(current_char)
                     words.append(buffer_word)
                     buffer_word = ""
                 else:
+                    # 这里的阈值可以修改，pre_weight是当前字的入边
                     if pre_weight / current_weight < 0.7:
                         words.append(buffer_word)
                         buffer_word = current_char
@@ -174,17 +170,10 @@ class TextGraph:
                     else:
                         buffer_word += current_char
 
-                print("%f\t\t\tbuffer:%s |" % (current_weight, buffer_word))
-                # else:
-                #     buffer_word = current_char
+                # print("%f\t\t\tbuffer:%s |" % (current_weight, buffer_word))
                 pre_weight = current_weight
                 current += 1
-                print(words)
+                # print(words)
             rs.append(words)
         return rs
 
-    def draw(self):
-        # nx.draw_networkx(self.text, font_family='SimHei', node_color='white')
-        # nx.draw_spring(self.text, font_family='SimHei', node_color='white')
-        nx.draw_shell(self.text, font_family='SimHei', node_color='black')
-        plt.show()

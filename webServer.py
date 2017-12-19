@@ -1,3 +1,7 @@
+#############################################
+# Deprecated
+# 简单服务器实现，已经弃用
+#############################################
 import os
 import re
 from wsgiref.simple_server import make_server

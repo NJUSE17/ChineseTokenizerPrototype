@@ -2,6 +2,7 @@ import jieba
 import re
 
 
+# 测试重合率
 def compare(pivot_array, testing_array):
     character_offset = 0
     pivot_word_offsets = set()
@@ -21,11 +22,13 @@ def compare(pivot_array, testing_array):
 
 class JiebaChecker:
     def __init__(self):
+        # 中文范围
         self.ptn = re.compile("[\u4e00-\u9fa5]+$")
 
+    # 返回“重合率 overlap”和jieba的分词结果
     def check(self, init_sentence, token_result):
         print("original sentence: %s" % init_sentence)
-        print("token_result"+str(token_result))
+        print("token_result" + str(token_result))
         if init_sentence.strip() == "":
             return None
 
@@ -42,4 +45,3 @@ class JiebaChecker:
             return True
         else:
             return False
-

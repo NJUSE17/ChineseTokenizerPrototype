@@ -154,8 +154,8 @@ class TextGraph:
             words = []
             while current in adj:
                 current_char = self.id_char_map[current]
-                print("=>"+current_char)
-                current_weight = self.text[current][current+1]['weight'] if current+1 in adj else 0
+                print("=>" + current_char)
+                current_weight = self.text[current][current + 1]['weight'] if current + 1 in adj else 0
                 # next_weight = self.text[current+1][current+2]['weight']
                 # if pre_weight is not None:
                 if current_weight == 0:
@@ -164,14 +164,16 @@ class TextGraph:
                     words.append(buffer_word)
                     buffer_word = ""
                 else:
-                    diff = (pre_weight-current_weight+0.0)/current_weight if pre_weight > current_weight else (current_weight - pre_weight + 0.0)/current_weight
-                    if diff > 0.3 and pre_weight != 0:
-                        buffer_word += str(current_char)
+                    if pre_weight / current_weight < 0.7:
+                        words.append(buffer_word)
+                        buffer_word = current_char
+                    elif pre_weight / current_weight > 1.4:
+                        buffer_word += current_char
                         words.append(buffer_word)
                         buffer_word = ""
                     else:
-                        buffer_word += str(current_char)
-                    print(diff)
+                        buffer_word += current_char
+
                 print("%f\t\t\tbuffer:%s |" % (current_weight, buffer_word))
                 # else:
                 #     buffer_word = current_char
@@ -180,8 +182,6 @@ class TextGraph:
                 print(words)
             rs.append(words)
         return rs
-
-
 
     def draw(self):
         # nx.draw_networkx(self.text, font_family='SimHei', node_color='white')

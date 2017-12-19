@@ -12,6 +12,13 @@ var LINK_HEIGHT = 200;
 var camera, scene, renderer;
 init();
 animate();
+function charPosition(index){
+    return {
+        x: index*10*FONT_SIZE,
+        y: LINK_HEIGHT,
+        z: 0
+    }
+}
 
 function init( ) {
     camera = new THREE.PerspectiveCamera( 45, window.innerWidth / (window.innerHeight-100), 1, 10000 );
@@ -23,28 +30,6 @@ function init( ) {
 
     setLines();
 
-    // 加载json
-//    var xhr;
-//    if(window.XMLHttpRequest){
-//        xhr = new XMLHttpRequest();
-//    }else if(window.ActiveXObject){
-//        xhr = new window.ActiveXObject();
-//    }else{
-//        alert("请升级至最新版本的浏览器");
-//    }
-//    if(xhr !=null){
-//        xhr.open("GET","/tokenize-result",true);
-//        xhr.send(null);
-//        xhr.onreadystatechange=function(){
-//            if(xhr.readyState==4&&xhr.status==200){
-//                var obj = JSON.parse(xhr.responseText);
-//                loadTextGraph(obj);
-//
-//            }
-//        };
-//
-//    }
-
 
     renderer = new THREE.WebGLRenderer( { antialias: true } );
     renderer.setPixelRatio( window.devicePixelRatio );
@@ -53,7 +38,9 @@ function init( ) {
     window.addEventListener( 'resize', onWindowResize, false );
 
 
-    var controls = new THREE.OrbitControls( camera, renderer.domElement );
+//    var controls = new THREE.OrbitControls( camera, renderer.domElement );
+    controls = new THREE.OrbitControls( camera, renderer.domElement );
+//    controls.noRotate = true;
     controls.target.set( 0, 200, 0 );
     controls.update();
 } // end init
@@ -107,25 +94,26 @@ var loader = new THREE.FontLoader();
         var current = {}
         var previous = null;
         while(current=texts[i]){
-            i ++;
             var currentChar = current['char'];
             var nbrs = current['neighbour'];
 //            console.log(currentChar)
 
-            var charX = i*6*FONT_SIZE;
-            var charObj = makeChar(currentChar, matDark, FONT_SIZE, charX, LINK_HEIGHT)
+            //var charX = i*6*FONT_SIZE;
+            var position = charPosition(i);
+//            var charObj = makeChar(currentChar, matDark, FONT_SIZE, charX, LINK_HEIGHT)
+            var charObj = makeChar(currentChar, matDark, FONT_SIZE, position.x, position.y, position.z);
             scene.add(charObj);
             allChars.push(charObj);
 
             if(previous){
-                var charLinkObj = makeLink(previous.x, previous.y, previous.z, charX, LINK_HEIGHT, 0);
-                var charWeightObj = makeChar(previous.weight, matDark, FONT_SIZE/3.0, (previous.x+charX)/2.0, LINK_HEIGHT, 0);
+                var charLinkObj = makeLink(previous.x, previous.y, previous.z, position.x, position.y, position.z);
+                var charWeightObj = makeChar(previous.weight, matDark, FONT_SIZE/3.0, (previous.x+position.x)/2.0, position.y, position.z);
                 scene.add(charLinkObj);
                 allLinks.push(charLinkObj);
                 scene.add(charWeightObj);
                 allChars.push(charWeightObj);
             }
-            previous = {x: charX, y: LINK_HEIGHT, z: 0, weight: current['outWeight']};
+            previous = {x: position.x, y: position.y, z: position.z, weight: current['outWeight']};
 
             var r = 3*FONT_SIZE;
             var interval =Math.PI * 2 / nbrs.length;
@@ -146,6 +134,7 @@ var loader = new THREE.FontLoader();
                 scene.add(weightNbrObj);
                 allChars.push(weightNbrObj);
             }
+            i ++;
         }
 
 
@@ -210,6 +199,6 @@ function render() {
     }else{
 //        console.log("none");
     }
-
+    controls.update();
     renderer.render( scene, camera );
 }

@@ -17,7 +17,7 @@
         <div id="tool" class="input-group">
             <input class="form-control" placeholder="输入待分词句子" type="text" id="sentence-input">
             <div class="input-group-btn">
-                <button @keyup.enter="onSubmit();" class="btn btn-primary" onclick="onSubmit();" type="button" id="submit-btn">提交</button>
+                <button v-on:keyup.enter="onSubmit();" class="btn btn-primary" v-on:click="onSubmit();" type="button" id="submit-btn">提交</button>
             </div>
         </div>
     </div>
@@ -34,7 +34,7 @@
     </div>
 </div>
         <h3 id="chars">
-            <span class="label label-primary char" v-for="char in chars" @click="select(char)" :class="{'char-active': char.isActive}">
+            <span class="label label-default char" v-for="char in chars" @click="select(char)" :class="{'char-active': char.isActive}">
                 {{char.value}}
             </span>
         </h3>
@@ -63,36 +63,50 @@
                     char.isActive = false;
                 });
                 char.isActive = true;
+                console.log("select char #"+char.index);
+                var position = charPosition(char.index);
+                console.log(position);
+                camera.position.set(position.x-13*FONT_SIZE, position.y+20, position.z+20*FONT_SIZE);
+                controls.target = new THREE.Vector3(position.x, position.y, position.z);
+            },
+
+            onSubmit: function (){
+                var sentence = $("#sentence-input").val();
+                console.log("提交句子："+sentence);
+                $.ajax({
+                    url: "/tokenize-result",
+                    dataType: 'json',
+                    data: {sentence:sentence},
+                    type: 'GET',
+                    success: function(res){
+                        clearGraph();
+                        var jieba = res.jieba;
+                        var words = res.result;
+                        var overlap = res.overlap;
+                        //console.log(jieba);
+                        //console.log(words);
+                        //console.log(overlap);
+                        // controller.chars = sentence.split("").map(function(char){return {value: char, isActive: false}});
+                        var chars = [];
+                        //console.log(res.graph);
+                        for(i in res.graph){
+                            var tmp = {value: res.graph[''+i]['char'], isActive: false, index: i};
+                            chars.push(tmp);
+                        }
+                        controller.chars = chars;
+                        controller.references = jieba;
+                        controller.words = words;
+                        loadTextGraph(res.graph);
+                    },
+                    error: function(res){
+                        console.error(res);
+                    }
+                });
             }
+
         }
     })
 
-    function onSubmit(){
-        var sentence = $("#sentence-input").val();
-        console.log("提交句子："+sentence);
-        $.ajax({
-            url: "/tokenize-result",
-            dataType: 'json',
-            data: {sentence:sentence},
-            type: 'GET',
-            success: function(res){
-                clearGraph();
-                var jieba = res.jieba;
-                var words = res.result;
-                var overlap = res.overlap;
-                console.log(jieba);
-                console.log(words);
-                console.log(overlap);
-                controller.chars = sentence.split("").map(function(char){return {value: char, isActive: false}});
-                controller.references = jieba;
-                controller.words = words;
-                loadTextGraph(res.graph);
-            },
-            error: function(res){
-                console.error(res);
-            }
-        });
-    }
 
 
 

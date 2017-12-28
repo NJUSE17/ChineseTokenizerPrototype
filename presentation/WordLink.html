@@ -15,9 +15,9 @@
     <div class="row">
     <div class="col-xs-4">
         <div id="tool" class="input-group">
-            <input class="form-control" placeholder="输入待分词句子" type="text" id="sentence-input">
+            <input v-on:keyup.enter="onSubmit();" class="form-control" placeholder="输入待分词句子" type="text" id="sentence-input">
             <div class="input-group-btn">
-                <button v-on:keyup.enter="onSubmit();" class="btn btn-primary" v-on:click="onSubmit();" type="button" id="submit-btn">提交</button>
+                <button class="btn btn-primary" v-on:click="onSubmit();" type="button" id="submit-btn">提交</button>
             </div>
         </div>
     </div>

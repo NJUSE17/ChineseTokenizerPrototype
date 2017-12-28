@@ -42,11 +42,15 @@ class CorpusGraph:
         return weight
 
     # 对于给定的字（key），取前K个最大的后接字
-    def get_sorted_neighbour(self, key, exclude=None, K=6):
-        if key not in self.corpus.adj:
+    def get_sorted_neighbour(self, key, exclude=None, K=6, reverse=False):
+        corpus = self.corpus
+        if reverse:
+            corpus = self.corpus.reverse()
+
+        if key not in corpus.adj:
             return []
 
-        nbr = self.corpus.adj[key]
+        nbr = corpus.adj[key]
         rs = []
         # print(nbr)
         # ########### 只需要获得前K个最大值，这里的排序可以优化(堆排序/K次冒泡排序...) ####################
@@ -72,6 +76,7 @@ class CorpusGraph:
             remain_weight += sorted_nbr[i][1]['weight']
 
         rs.append(("+" + str(remain_cnt), remain_weight))
+
         return rs
         # print(sorted_nbr)
 
@@ -127,8 +132,9 @@ class TextGraph:
             end_char = self.id_char_map[start_id + 1] if start_id + 1 in nbr else None
             out_weight = nbr[start_id + 1]['weight'] if start_id + 1 in nbr else 0
             # print(start_char, nbr[start_id+1]['weight'] if start_id + 1 in nbr else 0, out_weight)
-            nbr = corpus.get_sorted_neighbour(start_char, end_char)
-            text_json[i] = {"char": start_char, "outWeight": out_weight, "neighbour": nbr}
+            nbr_out = corpus.get_sorted_neighbour(start_char, end_char)
+            nbr_in = corpus.get_sorted_neighbour(start_char, end_char, reverse=True)
+            text_json[i] = {"char": start_char, "outWeight": out_weight, "neighbour_out": nbr_out, "neighbour_in": nbr_in}
             i += 1
 
         if path is not None:

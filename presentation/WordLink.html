@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:v-on="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
     <link href="/bootstrap.css" rel="stylesheet">
@@ -13,31 +13,41 @@
 <!--<h2>鼠标左键-旋转；右键-平移；滚轮-缩放</h2>-->
 <div id="control-panel">
     <div class="row">
-    <div class="col-xs-4">
-        <div id="tool" class="input-group">
-            <input v-on:keyup.enter="onSubmit();" class="form-control" placeholder="输入待分词句子" type="text" id="sentence-input">
-            <div class="input-group-btn">
-                <button class="btn btn-primary" v-on:click="onSubmit();" type="button" id="submit-btn">提交</button>
+        <div class="col-xs-4">
+            <div id="tool" class="input-group">
+                <input v-on:keyup.enter="onSubmit();" class="form-control" placeholder="输入待分词句子" type="text"
+                       id="sentence-input">
+                <div class="input-group-btn">
+                    <button class="btn btn-primary" v-on:click="onSubmit();" type="button" id="submit-btn">提交</button>
+                </div>
             </div>
+
+            <label> 上接字:
+                <button @click="changeNbrState(false);" class="btn btn-sm btn-default" :class="{'btn-success': inState.show}">{{inState.text}}</button>
+            </label>
+            &nbsp;&nbsp;&nbsp;&nbsp;
+            <label> 下接字:
+                <button @click="changeNbrState(true);" class="btn btn-sm btn-default" :class="{'btn-success': outState.show}">{{outState.text}}</button>
+            </label>
+        </div>
+        <div class="col-xs-8">
+
+            <h4 class="plain">
+                <small>分词结果</small>
+                <span class="label label-default word" v-for="word in words">{{word}}</span>
+            </h4>
+            <h4 class="plain">
+                <small>参考结果</small>
+                <span class="label label-success refer" v-for="refer in references">{{refer}}</span>
+            </h4>
         </div>
     </div>
-    <div class="col-xs-8">
-
-        <h4 class="plain">
-            <small>分词结果</small>
-            <span class="label label-default word" v-for="word in words">{{word}}</span>
-        </h4>
-        <h4 class="plain">
-            <small>参考结果</small>
-            <span class="label label-success refer" v-for="refer in references">{{refer}}</span>
-        </h4>
-    </div>
-</div>
-        <h3 id="chars">
-            <span class="label label-default char" v-for="char in chars" @click="select(char)" :class="{'char-active': char.isActive}">
+    <h3 id="chars">
+            <span class="label label-default char" v-for="char in chars" @click="select(char)"
+                  :class="{'char-active': char.isActive}">
                 {{char.value}}
             </span>
-        </h3>
+    </h3>
 </div>
 
 
@@ -55,30 +65,38 @@
             chars: [],
             words: [],
             references: [],
-            overlap: "N/A"
+            overlap: "N/A",
+            outState: {
+                show: true,
+                text: "开启"
+            },
+            inState: {
+                show: true,
+                text: "开启"
+            }
         },
         methods: {
-            select: function(char){
-                this.chars.forEach(function(char){
+            select: function (char) {
+                this.chars.forEach(function (char) {
                     char.isActive = false;
                 });
                 char.isActive = true;
-                console.log("select char #"+char.index);
+                console.log("select char #" + char.index);
                 var position = charPosition(char.index);
                 console.log(position);
-                camera.position.set(position.x-13*FONT_SIZE, position.y+20, position.z+20*FONT_SIZE);
+                camera.position.set(position.x - 13 * FONT_SIZE, position.y + 20, position.z + 20 * FONT_SIZE);
                 controls.target = new THREE.Vector3(position.x, position.y, position.z);
             },
 
-            onSubmit: function (){
+            onSubmit: function () {
                 var sentence = $("#sentence-input").val();
-                console.log("提交句子："+sentence);
+                console.log("提交句子：" + sentence);
                 $.ajax({
                     url: "/tokenize-result",
                     dataType: 'json',
-                    data: {sentence:sentence},
+                    data: {sentence: sentence},
                     type: 'GET',
-                    success: function(res){
+                    success: function (res) {
                         clearGraph();
                         var jieba = res.jieba;
                         var words = res.result;
@@ -89,8 +107,8 @@
                         // controller.chars = sentence.split("").map(function(char){return {value: char, isActive: false}});
                         var chars = [];
                         //console.log(res.graph);
-                        for(i in res.graph){
-                            var tmp = {value: res.graph[''+i]['char'], isActive: false, index: i};
+                        for (i in res.graph) {
+                            var tmp = {value: res.graph['' + i]['char'], isActive: false, index: i};
                             chars.push(tmp);
                         }
                         controller.chars = chars;
@@ -98,18 +116,20 @@
                         controller.words = words;
                         loadTextGraph(res.graph);
                     },
-                    error: function(res){
+                    error: function (res) {
                         console.error(res);
                     }
                 });
-            }
+            },
 
+            changeNbrState: function (isOut) {
+                var state = isOut?this.outState:this.inState;
+                state.show = !state.show;
+                state.text = state.show?"开启":"关闭";
+                displayNbr(this.outState.show, this.inState.show);
+            }
         }
     })
-
-
-
-
 
 
 </script>

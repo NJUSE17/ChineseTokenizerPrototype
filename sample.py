@@ -5,6 +5,8 @@ from Network import TextGraph
 from ResultReference import JiebaChecker
 
 cg = CorpusGraph()
+# cg.build_corpus()
+# cg.save_as_json()
 cg.load_from_json()
 checker = JiebaChecker()
 
@@ -24,4 +26,4 @@ def tokenize(sentence):
         ensure_ascii=False)
     return res
 
-print(tokenize("原告已履行退款义务的银行卡及汇款凭证等证据"))
+print(tokenize("原告amy已履行退款义务的银行卡及汇款123凭证等证据，这是一个逗号"))

@@ -162,16 +162,19 @@ class TextGraph:
                 # 当前字出边权重为0，说明当前字是词尾
                 if current_weight == 0:
                     buffer_word += str(current_char)
-                    words.append(buffer_word)
+                    if buffer_word != '':
+                        words.append(buffer_word)
                     buffer_word = ""
                 else:
                     # 这里的阈值可以修改，pre_weight是当前字的入边
                     if pre_weight / current_weight < 0.7:
-                        words.append(buffer_word)
+                        if buffer_word != "":
+                            words.append(buffer_word)
                         buffer_word = current_char
                     elif pre_weight / current_weight > 1.4:
                         buffer_word += current_char
-                        words.append(buffer_word)
+                        if buffer_word != "":
+                            words.append(buffer_word)
                         buffer_word = ""
                     else:
                         buffer_word += current_char

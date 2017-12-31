@@ -10,7 +10,7 @@ class CorpusIO:
     # 从数据库构造语料库
     def read_from_mongo(self, limit=20):
         db = self.db if self.db is not None else MongoClient('localhost', 27017).get_database(
-            'judgement').get_collection('train_edges')
+            'edges').get_collection('t_t')
         cursor = db.find({})
         cnt = 0
         for doc in cursor:
@@ -19,7 +19,7 @@ class CorpusIO:
             cnt += 1
             if cnt % 10000 == 0:
                 print(cnt)
-            edge = (doc['src_name'], doc['des_name'], doc['weight'])
+            edge = (doc['src'], doc['des'], doc['weight'])
             yield edge
 
     def save_as_json(self, corpus_json, path):

@@ -26,4 +26,5 @@ def tokenize(sentence):
         ensure_ascii=False)
     return res
 
-print(tokenize("原告amy已履行退款义务的银行卡及汇款123凭证等证据，这是一个逗号"))
+print(tokenize("义务人"))
+# print(tokenize("原告amy已履行退款义务的银行卡及汇款123凭证等证据，这是一个逗号"))

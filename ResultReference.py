@@ -1,3 +1,4 @@
+# coding=utf-8
 import jieba
 import thulac
 import re
@@ -50,6 +51,7 @@ class JiebaChecker:
         compare_jieba_graphx = compare(jieba_result, token_result)
         return {"overlap": compare_jieba_graphx, "jieba_result": jieba_result}
 
+
 class ThulacChecker:
     def __init__(self):
         pass
@@ -65,7 +67,7 @@ class ThulacChecker:
         thulac_result_gen = thu.cut(init_sentence)
         thulac_result = []
         for thulac_word in thulac_result_gen:
-            if(is_chinese(thulac_word[0])):
+            if is_chinese(thulac_word[0]):
                 thulac_result.append(thulac_word[0])
         compare_thulac_graphx = compare(thulac_result, token_result)
         return {"overlap": compare_thulac_graphx, "thulac_result": thulac_result}

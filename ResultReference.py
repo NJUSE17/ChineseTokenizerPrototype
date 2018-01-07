@@ -5,6 +5,7 @@ import re
 
 # 中文范围
 ptn = re.compile("[\u4e00-\u9fa5]+$")
+thu = thulac.thulac(seg_only=True)
 
 
 def is_chinese(word):
@@ -63,7 +64,6 @@ class ThulacChecker:
         if init_sentence.strip() == "":
             return None
 
-        thu = thulac.thulac(seg_only=True)
         thulac_result_gen = thu.cut(init_sentence)
         thulac_result = []
         for thulac_word in thulac_result_gen:

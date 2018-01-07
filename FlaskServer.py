@@ -4,7 +4,7 @@ from flask import send_from_directory
 from flask import send_file
 from Network import CorpusGraph
 from Network import TextGraph
-from ResultReference import JiebaChecker
+from ResultReference import JiebaChecker, ThulacChecker
 import os
 import json
 
@@ -13,7 +13,8 @@ cg = CorpusGraph()
 cg.load_from_json()
 
 # 分词结果校对
-checker = JiebaChecker()
+jieba_checker = JiebaChecker()
+thulac_checker = ThulacChecker()
 
 
 app = Flask(__name__, template_folder='./presentation', static_folder='./presentation')
@@ -52,16 +53,23 @@ def tokenize():
 
         # 暂时只对单句分词
         result = tg.cut()[0]
-        check = checker.check(sentence, result)
+        check_jieba = jieba_checker.check(sentence, result)
+        check_thulac = thulac_checker.check(sentence, result);
+
 
         # jieba的分词结果
-        jieba_result = check["jieba_result"]
-        overlap = check["overlap"]
+        jieba_result = check_jieba["jieba_result"]
+        jieba_overlap = check_jieba["overlap"]
+
+        thulac_result = check_thulac["thulac_result"]
+        thulac_overlap = check_thulac["overlap"]
         res = json.dumps(
-            {"graph": tg.make_json(cg, path=None), "result": result, "jieba": jieba_result, "overlap": overlap},
+            {"graph": tg.make_json(cg, path=None), "result": result,
+             "jieba": jieba_result, "jieba_overlap": jieba_overlap,
+             "thulac": thulac_result, "thulac_overlap": thulac_overlap},
             ensure_ascii=False)
         return res
 
 
 if __name__ == '__main__':
-    app.run(host="localhost", port="8000")
+    app.run(host="localhost", port=8000)

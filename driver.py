@@ -1,3 +1,4 @@
+from IO import CorpusIO
 from Network import CorpusGraph
 from Network import TextGraph
 
@@ -30,4 +31,11 @@ def test_text():
     # 输出语句图需要的json文件, path如果为None则返回json，而不保存在硬盘
     tg.make_json(cg, path='./data/text.json')
 
-test_text()
+
+# test_text()
+def make_local_mongo():
+    corpusio = CorpusIO()
+    corpusio.fetch_sentences_from_remote()
+
+
+make_local_mongo()

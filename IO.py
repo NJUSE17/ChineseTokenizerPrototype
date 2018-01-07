@@ -1,11 +1,45 @@
+import re
 from pymongo import MongoClient
 import random
 import json
 
 
+class RemoteIO:
+    def __init__(self):
+        self.db = MongoClient('njuse', 30000).get_database("lawCase").get_collection('paragraph')
+
+    def read_from_remote(self):
+        db = self.db
+        return db.find({}, {"plaintiffAlleges": 1, "defendantArgued": 1})
+
+
 class CorpusIO:
     def __init__(self):
         self.db = None
+
+    def fetch_sentences_from_remote(self, limit=1000):
+        cursor = RemoteIO().read_from_remote()
+        stc_db = MongoClient('localhost', 27017).get_database(
+            'judgement').get_collection('sentences_' + str(limit))
+
+        count = limit
+        for doc in cursor:
+            if count < 0:
+                break
+
+            pa = doc["plaintiffAlleges"]
+            da = doc["defendantArgued"]
+            if re.match(r"d+$", pa) and re.match(r"d+$", da):
+                # is figure, pass
+                pass
+            else:
+                count -= 1
+                pa_segs = re.split('。?？；：，;:,', pa)
+                da_segs = re.split('。；：？?，;:,', da)
+                for seg in pa_segs:
+                    stc_db.save({"text": seg})
+                for seg in da_segs:
+                    stc_db.save({"text": seg})
 
     # 从数据库构造语料库
     def read_from_mongo(self, limit=20):

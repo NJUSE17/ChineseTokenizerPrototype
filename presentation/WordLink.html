@@ -29,6 +29,10 @@
             <label> 下接字:
                 <button @click="changeNbrState(true);" class="btn btn-sm btn-default" :class="{'btn-success': outState.show}">{{outState.text}}</button>
             </label>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <label> 参考标准:
+                <button @click="changeRefSource();" class="btn btn-sm btn-primary">{{refSource}}</button>
+            </label>
         </div>
         <div class="col-xs-8">
 
@@ -64,7 +68,9 @@
         data: {
             chars: [],
             words: [],
+            refSource: "jieba",
             references: [],
+            refCache: {jieba:[], thulac:[]},
             overlap: "N/A",
             outState: {
                 show: true,
@@ -99,8 +105,12 @@
                     success: function (res) {
                         clearGraph();
                         var jieba = res.jieba;
+                        var thulac = res.thulac;
+                        controller.refCache.jieba = jieba;
+                        controller.refCache.thulac = thulac;
                         var words = res.result;
-                        var overlap = res.overlap;
+                        var jieba_overlap = res.jieba_overlap;
+                        var thulac_overlap = res.thulac_overlap;
                         //console.log(jieba);
                         //console.log(words);
                         //console.log(overlap);
@@ -127,6 +137,16 @@
                 state.show = !state.show;
                 state.text = state.show?"开启":"关闭";
                 displayNbr(this.outState.show, this.inState.show);
+            },
+
+            changeRefSource: function () {
+                if(controller.refSource === "jieba"){
+                    controller.refSource = "thulac";
+                    controller.references = controller.refCache["thulac"]
+                }else{
+                    controller.refSource = "jieba";
+                    controller.references = controller.refCache["jieba"]
+                }
             }
         }
     })

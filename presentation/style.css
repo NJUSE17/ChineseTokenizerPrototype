@@ -47,4 +47,12 @@ body {
 .plain{
     overflow-x: auto;
     overflow-y: hidden;
+    word-break: keep-all;
+    white-space: nowrap;
+}
+
+#chars{
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
 }

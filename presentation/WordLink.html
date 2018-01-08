@@ -31,7 +31,7 @@
             </label>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <label> 参考标准:
-                <button @click="changeRefSource();" class="btn btn-sm btn-primary">{{refSource}}</button>
+                <button @click="changeRefSource();" class="btn btn-sm btn-primary">{{refSource}} ({{ref.overlap}})</button>
             </label>
         </div>
         <div class="col-xs-8">
@@ -42,7 +42,7 @@
             </h4>
             <h4 class="plain">
                 <small>参考{{refSource}}</small>
-                <span class="label label-success refer" v-for="refer in references">{{refer}}</span>
+                <span class="label label-success refer" v-for="word in ref.words">{{word}}</span>
             </h4>
         </div>
     </div>
@@ -69,8 +69,8 @@
             chars: [],
             words: [],
             refSource: "jieba",
-            references: [],
-            refCache: {jieba:[], thulac:[]},
+            ref: {words: [], overlap:"n/a"},
+            refCache: {jieba:{words: [], overlap:"n/a"}, thulac:{words: [], overlap:"n/a"}},
             overlap: "N/A",
             outState: {
                 show: function () {
@@ -122,8 +122,6 @@
                         controller.refCache.jieba = jieba;
                         controller.refCache.thulac = thulac;
                         var words = res.result;
-                        var jieba_overlap = res.jieba_overlap;
-                        var thulac_overlap = res.thulac_overlap;
                         //console.log(jieba);
                         //console.log(words);
                         //console.log(overlap);
@@ -135,7 +133,7 @@
                             chars.push(tmp);
                         }
                         controller.chars = chars;
-                        controller.references = jieba;
+                        controller.ref = jieba;
                         controller.words = words;
                         loadTextGraph(res.graph);
 
@@ -156,12 +154,12 @@
             },
 
             changeRefSource: function () {
-                if(controller.refSource === "jieba"){
-                    controller.refSource = "thulac";
-                    controller.references = controller.refCache["thulac"]
+                if(this.refSource === "jieba"){
+                    this.refSource = "thulac";
+                    this.ref = this.refCache["thulac"]
                 }else{
-                    controller.refSource = "jieba";
-                    controller.references = controller.refCache["jieba"]
+                    this.refSource = "jieba";
+                    this.ref = this.refCache["jieba"]
                 }
             }
         }

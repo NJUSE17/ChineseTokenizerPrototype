@@ -82,6 +82,8 @@ function loadTextGraph(textJson) {
             text.position.y = y || 0;
             text.position.x = x || 0; //i*4*FONT_SIZE;
             text.position.z = z || 0;
+            text.name = char;
+            // text.parent = scene;
             return text;
         };
 
@@ -91,6 +93,7 @@ function loadTextGraph(textJson) {
             geometry.vertices.push(new THREE.Vector3(x2, y2, z2));
             var color = color || 0x006699;
             var line = new THREE.Line(geometry, new THREE.LineBasicMaterial({color: color}));
+            // line.parent = scene;
             return line;
         };
         var i = 0;
@@ -117,8 +120,7 @@ function loadTextGraph(textJson) {
             }
             previous = {x: position.x, y: position.y, z: position.z, weight: current['outWeight']};
 
-            var displayNbrs = function (nbrs, isOut) {
-                // var nbrs = current['neighbour'];
+            var makeNbrs = function (nbrs, isOut) {
                 var r = 4 * FONT_SIZE;
                 var cache = inNbrs;
                 var offset = -0.5*r;
@@ -128,33 +130,29 @@ function loadTextGraph(textJson) {
                 }
                 var interval = Math.PI * 2 / nbrs.length;
                 for (var j = 0; j < nbrs.length; j++) {
-    //                console.log(nbrs[j][0]);
                     var z = r * Math.cos(j * interval);
                     var y = r * Math.sin(j * interval) + LINK_HEIGHT;
-    //                console.log(j*interval+" "+nbrs[j][0]+ ":"+z+","+y);
                     var nbrObj = makeChar(nbrs[j][0], matLite, FONT_SIZE_NBR, charObj.position.x+offset, y, z);
-                    scene.add(nbrObj);
-                    // allChars.push(nbrObj);
                     cache.chars.push(nbrObj);
+                    scene.add(nbrObj);
 
                     var linkNbrObj = makeLink(charObj.position.x, charObj.position.y, charObj.position.z, nbrObj.position.x, nbrObj.position.y, nbrObj.position.z);
-                    scene.add(linkNbrObj);
-                    allLinks.push(linkNbrObj);
+                    // allLinks.push(linkNbrObj);
                     cache.links.push(linkNbrObj);
+                    scene.add(linkNbrObj);
 
                     var weightNbrObj = makeChar(nbrs[j][1], matLite, FONT_SIZE_NBR / 3.0, (charObj.position.x + nbrObj.position.x)/2.0, (charObj.position.y + nbrObj.position.y) / 2.0, (charObj.position.z + nbrObj.position.z) / 2.0);
-                    scene.add(weightNbrObj);
-                    // allChars.push(weightNbrObj);
                     cache.chars.push(weightNbrObj);
+                    scene.add(weightNbrObj);
                 }
-                cache.show = true;
             };
-            displayNbrs(current['neighbour_out'], true);
-            displayNbrs(current['neighbour_in'], false);
+            makeNbrs(current['neighbour_out'], true);
+            makeNbrs(current['neighbour_in'], false);
 
             i++;
         }
-
+        // displayNbr(outNbrs.show, inNbrs.show);
+        updateNbrDisplay();
 
     }); //end load function
 }
@@ -193,11 +191,17 @@ function clearGraph() {
     buffer.forEach(function (obj) {
         scene.remove(obj);
     });
+
+    displayNbr(false, false, true);
+    inNbrs.chars = [];
+    inNbrs.links = [];
+    outNbrs.chars = [];
+    outNbrs.links = [];
 }
 
-function displayNbr(showOut, showIn) {
+function updateNbrDisplay() {
     var removeFromCache = function (cache) {
-        cache.show = false;
+        // cache.show = false;
         cache.chars.forEach(function (obj) {
             scene.remove(obj);
         });
@@ -207,7 +211,43 @@ function displayNbr(showOut, showIn) {
     };
 
     var addFromCache = function (cache) {
-        cache.show = true;
+        // cache.show = true;
+        cache.chars.forEach(function (obj) {
+            scene.add(obj);
+        });
+        cache.links.forEach(function (obj) {
+            scene.add(obj);
+        });
+    };
+
+    if(outNbrs.show === true){
+        addFromCache(outNbrs);
+    }else{
+        removeFromCache(outNbrs);
+    }
+
+    if(inNbrs.show === true){
+        addFromCache(inNbrs);
+    }else{
+        removeFromCache(inNbrs);
+    }
+}
+
+function displayNbr(showOut, showIn, force) {
+    var removeFromCache = function (cache) {
+        if(!force)
+            cache.show = false;
+        cache.chars.forEach(function (obj) {
+            scene.remove(obj);
+        });
+        cache.links.forEach(function (obj) {
+            scene.remove(obj);
+        });
+    };
+
+    var addFromCache = function (cache) {
+        if(!force)
+            cache.show = true;
         cache.chars.forEach(function (obj) {
             scene.add(obj);
         });

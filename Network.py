@@ -70,10 +70,13 @@ class CorpusGraph:
 
         j = 0
         for i in range(K - 1):
+            if j >= len(sorted_nbr):
+                break
+
             # 循环K次，如果相邻字正好是下一个字，则跳过这个相邻字
             if sorted_nbr[j][0] == exclude:
                 j += 1
-                
+
             if j >= len(sorted_nbr):
                 break
 
@@ -154,6 +157,7 @@ class TextGraph:
         time_count("获取后接词")
 
         i = 0
+        corpus.reverse()
         for start_id, nbr in self.text.adj.items():
             start_char = self.id_char_map[start_id]
             end_char = self.id_char_map[start_id + 1] if start_id + 1 in nbr else None
@@ -163,6 +167,7 @@ class TextGraph:
             nbr_in = corpus.get_sorted_neighbour(start_char, end_char)
             text_json[i]["neighbour_in"] = nbr_in
             i += 1
+        corpus.reverse()
         time_count("获取前接词")
 
         # def get_next(item):

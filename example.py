@@ -35,14 +35,17 @@ def tokenize(sentence):
 def batching(parag):
     j = 0
     sen_list = []
-    for i in range(0,len(parag)-1):
+    for i in range(len(parag)):
         if(parag[i] == '。'):
+            print("#"+str(parag[j:i])+"#")
             sen_list.append(tokenize(parag[j:i]))
             j = i+1
     return sen_list
 
 if __name__ == '__main__':
     re = DisIO()
-    str = re.sen_from_mongo()
-    sen_list = batching(str)
+    # str = re.sen_from_mongo()
+    string = "上山打老虎。。老虎不在家。碰到小松鼠"
+    sen_list = batching(string)
+    print(sen_list)
     re.re_to_text('./data/result.txt', sen_list)

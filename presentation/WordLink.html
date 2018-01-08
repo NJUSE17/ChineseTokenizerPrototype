@@ -23,11 +23,11 @@
             </div>
 
             <label> 上接字:
-                <button @click="changeNbrState(false);" class="btn btn-sm btn-default" :class="{'btn-success': inState.show}">{{inState.text}}</button>
+                <button @click="changeNbrState(false);" class="btn btn-sm btn-default" :class="{'btn-success': inState.show()}">{{inState.text()}}</button>
             </label>
             &nbsp;&nbsp;&nbsp;&nbsp;
             <label> 下接字:
-                <button @click="changeNbrState(true);" class="btn btn-sm btn-default" :class="{'btn-success': outState.show}">{{outState.text}}</button>
+                <button @click="changeNbrState(true);" class="btn btn-sm btn-default" :class="{'btn-success': outState.show()}">{{outState.text()}}</button>
             </label>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <label> 参考标准:
@@ -41,7 +41,7 @@
                 <span class="label label-default word" v-for="word in words">{{word}}</span>
             </h4>
             <h4 class="plain">
-                <small>参考结果</small>
+                <small>参考{{refSource}}</small>
                 <span class="label label-success refer" v-for="refer in references">{{refer}}</span>
             </h4>
         </div>
@@ -73,12 +73,23 @@
             refCache: {jieba:[], thulac:[]},
             overlap: "N/A",
             outState: {
-                show: true,
-                text: "开启"
+                show: function () {
+                    // 这里用了engine.js中的全局变量outNbrs，这样非常不好，有机会我会重构
+                    return outNbrs.show;
+                },
+                text: function () {
+                    return outNbrs.show?"开启":"关闭";
+                },
+                obj: outNbrs
             },
             inState: {
-                show: true,
-                text: "开启"
+                show: function () {
+                    return inNbrs.show;
+                },
+                text: function () {
+                    return inNbrs.show?"开启":"关闭";
+                },
+                obj: inNbrs
             }
         },
         methods: {
@@ -97,6 +108,7 @@
             onSubmit: function () {
                 var sentence = $("#sentence-input").val();
                 console.log("提交句子：" + sentence);
+                var self = this;
                 $.ajax({
                     url: "/tokenize-result",
                     dataType: 'json',
@@ -104,6 +116,7 @@
                     type: 'GET',
                     success: function (res) {
                         clearGraph();
+                        // debugger;
                         var jieba = res.jieba;
                         var thulac = res.thulac;
                         controller.refCache.jieba = jieba;
@@ -125,6 +138,9 @@
                         controller.references = jieba;
                         controller.words = words;
                         loadTextGraph(res.graph);
+
+                        // 注意，下一行代码没有意义，loadTextGraph中的逻辑是异步执行的
+                        // displayNbr(self.outState.show, self.inState.show)
                     },
                     error: function (res) {
                         console.error(res);
@@ -134,9 +150,9 @@
 
             changeNbrState: function (isOut) {
                 var state = isOut?this.outState:this.inState;
-                state.show = !state.show;
-                state.text = state.show?"开启":"关闭";
-                displayNbr(this.outState.show, this.inState.show);
+                state.obj.show = !state.obj.show;
+                // displayNbr(this.outState.show(), this.inState.show());
+                updateNbrDisplay();
             },
 
             changeRefSource: function () {

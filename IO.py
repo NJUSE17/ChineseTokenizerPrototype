@@ -108,5 +108,5 @@ class DisIO:
             dis.write("result: " + str(cut[i]["result"])+"\n")
             dis.write("jieba:  " + str(cut[i]["jieba"]) + "  " + str(cut[i]["jieba_overlap"])+"\n")
             dis.write("thulac: " + str(cut[i]["thulac"]) + "  " + str(cut[i]["thulac_overlap"])+"\n\n")
-        dis.write("jieba:" + str(jieba_sum / length) + "  thulac:" + str(thulac_sum / length)+"\n")
+        dis.write("jieba:" + "n/a" if length == 0 else str(jieba_sum / length) + "  thulac:" + "n/a" if length == 0 else str(thulac_sum / length)+"\n")
         dis.close()

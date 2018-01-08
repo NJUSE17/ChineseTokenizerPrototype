@@ -1,5 +1,7 @@
 import json
 
+from utl import count as time_count
+
 from IO import CorpusIO
 from IO import TextIO
 import networkx as nx
@@ -9,6 +11,7 @@ from ResultReference import is_chinese
 class CorpusGraph:
     def __init__(self):
         self.corpus = nx.DiGraph()
+        self.reversed_corpus_cache = None
         self.corpus_io = CorpusIO()
 
     # 需要mongodb
@@ -29,7 +32,7 @@ class CorpusGraph:
 
     # 从json文件读取一个networkx的语料库实例
     def load_from_json(self, path='./data/corpus_in_use.json'):
-        print("loading corpus json file: "+str(path))
+        print("loading corpus json file: " + str(path))
         json_obj = self.corpus_io.load_as_json(path)
         print("loaded")
         self.corpus = nx.from_dict_of_dicts(json_obj, create_using=self.corpus)
@@ -42,11 +45,19 @@ class CorpusGraph:
             pass
         return weight
 
+    def reverse(self):
+        if self.reversed_corpus_cache is None:
+            self.reversed_corpus_cache = self.corpus.reverse()
+
+        tmp = self.corpus
+        self.corpus = self.reversed_corpus_cache
+        self.reversed_corpus_cache = tmp
+
     # 对于给定的字（key），取前K个最大的后接字
-    def get_sorted_neighbour(self, key, exclude=None, K=6, reverse=False):
+    def get_sorted_neighbour(self, key, exclude=None, K=6):
         corpus = self.corpus
-        if reverse:
-            corpus = self.corpus.reverse()
+        # if reverse:
+        #     corpus = self.corpus.reverse()
 
         if key not in corpus.adj:
             return []
@@ -59,12 +70,13 @@ class CorpusGraph:
 
         j = 0
         for i in range(K - 1):
-            if j >= len(sorted_nbr):
-                break
-
             # 循环K次，如果相邻字正好是下一个字，则跳过这个相邻字
             if sorted_nbr[j][0] == exclude:
                 j += 1
+                
+            if j >= len(sorted_nbr):
+                break
+
             rs.append((sorted_nbr[j][0], sorted_nbr[j][1]['weight']))
             j += 1
 
@@ -126,22 +138,67 @@ class TextGraph:
             self.text[edge[0]][edge[1]]['weight'] = weight
 
     def make_json(self, corpus, path='./data/text.json'):
+        time_count("make_json", print_to_console=False)
         text_json = {}
         i = 0
+
         for start_id, nbr in self.text.adj.items():
             start_char = self.id_char_map[start_id]
             end_char = self.id_char_map[start_id + 1] if start_id + 1 in nbr else None
             out_weight = nbr[start_id + 1]['weight'] if start_id + 1 in nbr else 0
             # print(start_char, nbr[start_id+1]['weight'] if start_id + 1 in nbr else 0, out_weight)
             nbr_out = corpus.get_sorted_neighbour(start_char, end_char)
-            nbr_in = corpus.get_sorted_neighbour(start_char, end_char, reverse=True)
-            text_json[i] = {"char": start_char, "outWeight": out_weight, "neighbour_out": nbr_out, "neighbour_in": nbr_in}
+            # nbr_in = corpus.get_sorted_neighbour(start_char, end_char, reverse=True)
+            text_json[i] = {"char": start_char, "outWeight": out_weight, "neighbour_out": nbr_out, "neighbour_in": None}
             i += 1
+        time_count("获取后接词")
+
+        i = 0
+        for start_id, nbr in self.text.adj.items():
+            start_char = self.id_char_map[start_id]
+            end_char = self.id_char_map[start_id + 1] if start_id + 1 in nbr else None
+            # out_weight = nbr[start_id + 1]['weight'] if start_id + 1 in nbr else 0
+            # print(start_char, nbr[start_id+1]['weight'] if start_id + 1 in nbr else 0, out_weight)
+            # nbr_out = corpus.get_sorted_neighbour(start_char, end_char)
+            nbr_in = corpus.get_sorted_neighbour(start_char, end_char)
+            text_json[i]["neighbour_in"] = nbr_in
+            i += 1
+        time_count("获取前接词")
+
+        # def get_next(item):
+        #     global i
+        #     global text_json
+        #     start_id = item[0]
+        #     nbr = item[1]
+        #     start_char = self.id_char_map[start_id]
+        #     end_char = self.id_char_map[start_id + 1] if start_id + 1 in nbr else None
+        #     out_weight = nbr[start_id + 1]['weight'] if start_id + 1 in nbr else 0
+        #     nbr_out = corpus.get_sorted_neighbour(start_char, end_char)
+        #     # nbr_in = corpus.get_sorted_neighbour(start_char, end_char, reverse=True)
+        #     text_json[i] = {"char": start_char, "outWeight": out_weight, "neighbour_out": nbr_out,
+        #                     "neighbour_in": ""}
+        #     i += 1
+        #
+        # def get_previous(item):
+        #     global text_json
+        #     start_id = item[0]
+        #     nbr = item[1]
+        #     start_char = self.id_char_map[start_id]
+        #     end_char = self.id_char_map[start_id + 1] if start_id + 1 in nbr else None
+        #     nbr_in = corpus.get_sorted_neighbour(start_char, end_char, reverse=True)
+        #     text_json[i]["neighbour_in"] = nbr_in
+        #
+        # items = self.text.adj.items()
+        # map(get_next, items)
+        # time_count("获取后接字")
+        # corpus.reverse()
+        # map(get_previous, items)
+        # corpus.reverse()
+        # time_count("获取前接字")
 
         if path is not None:
             json.dump(text_json, open(path, 'w', encoding='utf-8'), ensure_ascii=False, indent=4)
             print("text json ready at: " + path)
-
         return text_json
 
     # 按照阈值切边分词
@@ -186,4 +243,3 @@ class TextGraph:
                 # print(words)
             rs.append(words)
         return rs
-

@@ -6,11 +6,11 @@ import json
 
 class RemoteIO:
     def __init__(self):
-        self.db = MongoClient('njuse', 30000).get_database("lawCase").get_collection('paragraph')
+        self.db = MongoClient('njuse', 20000).get_database("tokenizer_qiao").get_collection('sentences_50k')
 
-    def read_from_remote(self):
+    def read_sentence_from_remote(self):
         db = self.db
-        return db.find({}, {"plaintiffAlleges": 1, "defendantArgued": 1})
+        return db.find({}, {"text": 1})
 
 
 class CorpusIO:

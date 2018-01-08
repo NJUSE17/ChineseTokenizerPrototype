@@ -6,6 +6,8 @@ import re
 # 中文范围
 ptn = re.compile("[\u4e00-\u9fa5]+$")
 thu = thulac.thulac(seg_only=True)
+# thu is removed
+# thu = None
 
 
 def is_chinese(word):
@@ -39,17 +41,20 @@ class JiebaChecker:
 
     # 返回“重合率 overlap”和jieba的分词结果
     def check(self, init_sentence, token_result):
-        print("original sentence: %s" % init_sentence)
-        print("token_result" + str(token_result))
+        # print("original sentence: %s" % init_sentence)
+        # print("token_result" + str(token_result))
         if init_sentence.strip() == "":
             return None
 
         jieba_result_gen = jieba.cut(init_sentence)
+        # print("jieba cut done")
         jieba_result = []
         for jieba_word in jieba_result_gen:
             if is_chinese(jieba_word):
                 jieba_result.append(jieba_word)
+        # print("jieba result:"+str(jieba_result))
         compare_jieba_graphx = compare(jieba_result, token_result)
+        # print("checker return")
         return {"overlap": compare_jieba_graphx, "jieba_result": jieba_result}
 
 
@@ -59,8 +64,8 @@ class ThulacChecker:
 
     # 返回“重合率 overlap”和jieba的分词结果
     def check(self, init_sentence, token_result):
-        print("original sentence: %s" % init_sentence)
-        print("token_result" + str(token_result))
+        # print("original sentence: %s" % init_sentence)
+        # print("token_result" + str(token_result))
         if init_sentence.strip() == "":
             return None
 

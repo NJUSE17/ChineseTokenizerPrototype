@@ -5,6 +5,7 @@ from flask import send_file
 from Network import CorpusGraph
 from Network import TextGraph
 from ResultReference import JiebaChecker, ThulacChecker
+from utl import count as time_count
 import os
 import json
 
@@ -53,8 +54,11 @@ def tokenize():
 
         # 暂时只对单句分词
         result = tg.cut()[0]
+        time_count(print_to_console=False)
         check_jieba = jieba_checker.check(sentence, result)
-        check_thulac = thulac_checker.check(sentence, result);
+        time_count("jieba分词完毕")
+        check_thulac = thulac_checker.check(sentence, result)
+        time_count("thulac分词完毕")
 
 
         # jieba的分词结果
@@ -68,6 +72,13 @@ def tokenize():
              "jieba": jieba_result, "jieba_overlap": jieba_overlap,
              "thulac": thulac_result, "thulac_overlap": thulac_overlap},
             ensure_ascii=False)
+        # print("json dumping")
+        # res = json.dumps(
+        #     {"graph": tg.make_json(cg, path=None), "result": result,
+        #      "jieba": jieba_result, "jieba_overlap": jieba_overlap,
+        #      },
+        #     ensure_ascii=False)
+        print("server returned")
         return res
 
 

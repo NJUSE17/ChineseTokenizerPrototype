@@ -6,40 +6,37 @@ import json
 
 class RemoteIO:
     def __init__(self):
-        self.db = MongoClient('njuse', 20000).get_database("tokenizer_qiao").get_collection('sentences_50k')
+        self.db = MongoClient('192.168.68.11', 20000).get_database("tokenizer_qiao").get_collection('sentences_sample')
+        self.sentence_size = self.db.find().count()
+        self.step = self.sentence_size
+        self.skip = 0
+
+    def read_sentence_randomly(self):
+        while self.skip + self.step >= self.sentence_size:
+            self.skip = 0
+            self.step = int(self.step/2)
+        if self.step + self.skip < self.sentence_size:
+            random_step = random.randint(0, self.step)
+            pipeline = [
+                {"$skip": self.skip+random_step},
+                {"$limit": 1}
+            ]
+            self.skip += random_step
+            docs = list(self.db.aggregate(pipeline))
+            doc = docs[0] if len(docs) > 0 else None
+            self.db.update({"_id": doc["_id"]}, {"$inc": {"analysed": 1}})
+            return doc
+        else:
+            return None
 
     def read_sentence_from_remote(self):
         db = self.db
-        return db.find({}, {"text": 1})
+        return db.find()
 
 
 class CorpusIO:
     def __init__(self):
         self.db = None
-
-    def fetch_sentences_from_remote(self, limit=1000):
-        cursor = RemoteIO().read_from_remote()
-        stc_db = MongoClient('localhost', 27017).get_database(
-            'judgement').get_collection('sentences_' + str(limit))
-
-        count = limit
-        for doc in cursor:
-            if count < 0:
-                break
-
-            pa = doc["plaintiffAlleges"]
-            da = doc["defendantArgued"]
-            if re.match(r"d+$", pa) and re.match(r"d+$", da):
-                # is figure, pass
-                pass
-            else:
-                count -= 1
-                pa_segs = re.split('。?？；：，;:,', pa)
-                da_segs = re.split('。；：？?，;:,', da)
-                for seg in pa_segs:
-                    stc_db.save({"text": seg})
-                for seg in da_segs:
-                    stc_db.save({"text": seg})
 
     # 从数据库构造语料库
     def read_from_mongo(self, limit=20):
@@ -85,6 +82,7 @@ class TextIO:
         for doc in cursor:
             yield doc['text']
 
+
 class DisIO:
     def __init__(self):
         self.db = MongoClient('localhost', 27017).get_database('orig').get_collection('sentences')
@@ -96,7 +94,7 @@ class DisIO:
             str = str + sen['text']
         return str
 
-    def re_to_text(self,path, cut=[]):
+    def re_to_text(self, path, cut=[]):
         jieba_sum = 0.0
         thulac_sum = 0.0
         dis = open(path, 'a', encoding='utf-8')
@@ -104,9 +102,11 @@ class DisIO:
         for i in range(0, length):
             jieba_sum += cut[i]["jieba_overlap"]
             thulac_sum += cut[i]["thulac_overlap"]
-            dis.write("origin: " + cut[i]["sentence"]+"\n")
-            dis.write("result: " + str(cut[i]["result"])+"\n")
-            dis.write("jieba:  " + str(cut[i]["jieba"]) + "  " + str(cut[i]["jieba_overlap"])+"\n")
-            dis.write("thulac: " + str(cut[i]["thulac"]) + "  " + str(cut[i]["thulac_overlap"])+"\n\n")
-        dis.write("jieba:" + "n/a" if length == 0 else str(jieba_sum / length) + "  thulac:" + "n/a" if length == 0 else str(thulac_sum / length)+"\n")
+            dis.write("origin: " + cut[i]["sentence"] + "\n")
+            dis.write("result: " + str(cut[i]["result"]) + "\n")
+            dis.write("jieba:  " + str(cut[i]["jieba"]) + "  " + str(cut[i]["jieba_overlap"]) + "\n")
+            dis.write("thulac: " + str(cut[i]["thulac"]) + "  " + str(cut[i]["thulac_overlap"]) + "\n\n")
+        dis.write(
+            "jieba:" + "n/a" if length == 0 else str(jieba_sum / length) + "  thulac:" + "n/a" if length == 0 else str(
+                thulac_sum / length) + "\n")
         dis.close()

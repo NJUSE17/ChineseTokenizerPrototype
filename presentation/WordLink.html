@@ -13,12 +13,17 @@
 <!--<h2>鼠标左键-旋转；右键-平移；滚轮-缩放</h2>-->
 <div id="control-panel">
     <div class="row">
-        <div class="col-xs-4">
+        <div class="col-xs-5">
             <div id="tool" class="input-group">
-                <input v-on:keyup.enter="onSubmit();" class="form-control" placeholder="输入待分词句子" type="text"
+                <div class="input-group-btn">
+                    <button class="btn btn-default" v-on:click="historyLast();" type="button">&lt;</button>
+                    <button class="btn btn-default" v-on:click="historyNext();" type="button">&gt;</button>
+                </div>
+                <input v-model="inputSentence" v-on:keyup.enter="onSubmit();" class="form-control" placeholder="输入待分词句子" type="text"
                        id="sentence-input">
                 <div class="input-group-btn">
-                    <button class="btn btn-primary" v-on:click="onSubmit();" type="button" id="submit-btn">提交</button>
+                    <button class="btn btn-primary" v-on:click="randomGet();" type="button" title="需要软院VPN连接">获取</button>
+                    <button class="btn btn-info" v-on:click="onSubmit();" type="button" id="submit-btn">提交</button>
                 </div>
             </div>
 
@@ -31,17 +36,17 @@
             </label>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <label> 参考标准:
-                <button @click="changeRefSource();" class="btn btn-sm btn-primary">{{refSource}} ({{ref.overlap}})</button>
+                <button @click="changeRefSource();" class="btn btn-sm btn-warning">{{refSource}} ({{ref.overlap}})</button>
             </label>
         </div>
-        <div class="col-xs-8">
+        <div class="col-xs-7" style="overflow-x: auto">
 
             <h4 class="plain">
                 <small>分词结果</small>
                 <span class="label label-default word" v-for="word in words">{{word}}</span>
             </h4>
             <h4 class="plain">
-                <small>参考{{refSource}}</small>
+                <small>参考 {{refSource}}</small>
                 <span class="label label-success refer" v-for="word in ref.words">{{word}}</span>
             </h4>
         </div>
@@ -66,6 +71,9 @@
     var controller = new Vue({
         el: "#control-panel",
         data: {
+            inputSentence: "",
+            sentenceHistory: [],
+            sentenceHistoryItr: -1,
             chars: [],
             words: [],
             refSource: "jieba",
@@ -106,7 +114,8 @@
             },
 
             onSubmit: function () {
-                var sentence = $("#sentence-input").val();
+                var sentence = this.inputSentence;
+                // var sentence = $("#sentence-input").val();
                 console.log("提交句子：" + sentence);
                 var self = this;
                 $.ajax({
@@ -136,7 +145,8 @@
                         controller.ref = jieba;
                         controller.words = words;
                         loadTextGraph(res.graph);
-
+                        self.sentenceHistory.push(sentence);
+                        self.sentenceHistoryItr = self.sentenceHistory.length-1;
                         // 注意，下一行代码没有意义，loadTextGraph中的逻辑是异步执行的
                         // displayNbr(self.outState.show, self.inState.show)
                     },
@@ -161,6 +171,40 @@
                     this.refSource = "jieba";
                     this.ref = this.refCache["jieba"]
                 }
+            },
+
+            historyNext: function () {
+                var itr = this.sentenceHistoryItr;
+                var history = this.sentenceHistory;
+                if(itr+1<history.length){
+                    this.inputSentence = history[itr+1];
+                    this.sentenceHistoryItr ++;
+
+                }
+            },
+
+            historyLast: function () {
+                if(this.sentenceHistory.length>0 && this.sentenceHistoryItr-1>=0){
+                    this.inputSentence = this.sentenceHistory[--this.sentenceHistoryItr];
+                }
+            },
+            
+            randomGet: function () {
+                var self = this;
+                $.ajax({
+                    url: "/sentence-for-analyse",
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (res) {
+                        self.inputSentence = res.text;
+                        console.log("获取以下数据：");
+                        console.log(res);
+                    },
+                    error: function () {
+                        alert("获取失败")
+
+                    }
+                });
             }
         }
     })

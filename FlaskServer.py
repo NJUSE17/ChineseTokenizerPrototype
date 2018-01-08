@@ -2,6 +2,8 @@ from flask import Flask
 from flask import request
 from flask import send_from_directory
 from flask import send_file
+
+from IO import RemoteIO
 from Network import CorpusGraph
 from Network import TextGraph
 from ResultReference import JiebaChecker, ThulacChecker
@@ -17,6 +19,7 @@ cg.load_from_json()
 jieba_checker = JiebaChecker()
 thulac_checker = ThulacChecker()
 
+rio = RemoteIO()
 
 app = Flask(__name__, template_folder='./presentation', static_folder='./presentation')
 
@@ -37,6 +40,13 @@ def favicon():
 def load_ref(loadfile):
     print(loadfile)
     return send_from_directory(os.path.join(app.root_path, 'presentation'), loadfile)
+
+
+# 随机获取句子
+@app.route('/sentence-for-analyse', methods=['GET', 'PST'])
+def get_sentence_randomly():
+    doc = rio.read_sentence_randomly()
+    return json.dumps({"text": doc["text"]})
 
 
 # 分词的api，web接口只对单句分词（目前）
@@ -60,17 +70,21 @@ def tokenize():
         check_thulac = thulac_checker.check(sentence, result)
         time_count("thulac分词完毕")
 
-
         # jieba的分词结果
         jieba_result = check_jieba["jieba_result"]
         jieba_overlap = check_jieba["overlap"]
 
         thulac_result = check_thulac["thulac_result"]
         thulac_overlap = check_thulac["overlap"]
+        # res = json.dumps(
+        #     {"graph": tg.make_json(cg, path=None), "result": result,
+        #      "jieba": jieba_result, "jieba_overlap": jieba_overlap,
+        #      "thulac": thulac_result, "thulac_overlap": thulac_overlap},
+        #     ensure_ascii=False)
         res = json.dumps(
             {"graph": tg.make_json(cg, path=None), "result": result,
-             "jieba": jieba_result, "jieba_overlap": jieba_overlap,
-             "thulac": thulac_result, "thulac_overlap": thulac_overlap},
+             "jieba": {"words": jieba_result, "overlap": "%.2f" % jieba_overlap},
+             "thulac": {"words": thulac_result, "overlap": "%.2f" % thulac_overlap}},
             ensure_ascii=False)
         # print("json dumping")
         # res = json.dumps(

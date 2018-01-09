@@ -2,21 +2,29 @@ import re
 from pymongo import MongoClient
 import random
 import json
+from utl import count as time_counter
 
 
 class RemoteIO:
     def __init__(self):
-        self.db = MongoClient('192.168.68.11', 20000).get_database("tokenizer_qiao").get_collection('sentences_splited')
+        time_counter(print_to_console=False)
+        print("初始化 RemoteIO")
+        self.db = MongoClient('192.168.68.11', 20000).get_database("tokenizer_qiao").get_collection('splited_sentences')
         self.sentence_size = self.db.find().count()
         self.step = self.sentence_size
         self.skip = 0
+        time_counter("初始化完毕")
 
     def read_sentence_randomly(self):
         while self.skip + self.step >= self.sentence_size:
+            print("skip:%d, step:%d, size:%d" % (self.skip, self.step, self.sentence_size))
+            if self.step == 0:
+                return None
             self.skip = 0
             self.step = int(self.step/2)
         if self.step + self.skip < self.sentence_size:
             random_step = random.randint(0, self.step)
+            # print("获取 skip:%d" % self.skip+random_step)
             pipeline = [
                 {"$skip": self.skip+random_step},
                 {"$limit": 1}
@@ -25,6 +33,7 @@ class RemoteIO:
             docs = list(self.db.aggregate(pipeline))
             doc = docs[0] if len(docs) > 0 else None
             self.db.update({"_id": doc["_id"]}, {"$inc": {"analysed": 1}})
+            time_counter("已获取到")
             return doc
         else:
             return None

@@ -6,7 +6,7 @@ import json
 
 class RemoteIO:
     def __init__(self):
-        self.db = MongoClient('192.168.68.11', 20000).get_database("tokenizer_qiao").get_collection('sentences_sample')
+        self.db = MongoClient('192.168.68.11', 20000).get_database("tokenizer_qiao").get_collection('sentences_splited')
         self.sentence_size = self.db.find().count()
         self.step = self.sentence_size
         self.skip = 0

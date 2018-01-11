@@ -49,8 +49,8 @@ class CorpusIO:
 
     # 从数据库构造语料库
     def read_from_mongo(self, limit=20):
-        db = self.db if self.db is not None else MongoClient('localhost', 27017).get_database(
-            'edges').get_collection('t_t')
+        db = self.db if self.db is not None else MongoClient('192.168.68.11', 20000).get_database(
+            'tokenizer_qiao').get_collection('edges')
         cursor = db.find({})
         cnt = 0
         for doc in cursor:

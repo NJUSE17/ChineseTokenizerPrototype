@@ -63,8 +63,9 @@ def tokenize():
         tg.fill_edge(cg)
 
         # 暂时只对单句分词
-        result = tg.cut()[0]
         time_count(print_to_console=False)
+        result = tg.cut()[0]
+        time_count("分词完毕")
         check_jieba = jieba_checker.check(sentence, result)
         time_count("jieba分词完毕")
         check_thulac = thulac_checker.check(sentence, result)

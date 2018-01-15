@@ -5,6 +5,25 @@ import json
 from utl import count as time_counter
 
 
+class NotationIO:
+    def __init__(self):
+        # self.test_db = MongoClient("192.168.68.11", 20000).get_database("tokenizer_qiao").get_collection('sentences_sample')
+        self.test_db = MongoClient("192.168.68.11", 20000).get_database("tokenizer_qiao").get_collection('sentence4test')
+        self.test_size = self.test_db.find().count()
+        self.test_cursor = self.test_db.find()
+        self.train_db = MongoClient("192.168.68.11", 20000).get_database("tokenizer_qiao").get_collection('sentence4train')
+
+    def get_raw_randomly(self):
+        for doc in self.test_cursor:
+            if random.random() > 0.3:
+                yield doc
+
+    def move_to_train(self, noted_doc):
+        self.train_db.insert_one(noted_doc)
+        self.test_db.delete_one({"_id": noted_doc["_id"]})
+
+
+
 class RemoteIO:
     def __init__(self):
         time_counter(print_to_console=False)

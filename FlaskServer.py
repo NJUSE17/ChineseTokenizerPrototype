@@ -66,7 +66,13 @@ def submit_notation_sentence():
 # 随机获取句子
 @app.route('/sentence-for-analyse', methods=['GET', 'PST'])
 def get_sentence_randomly():
+    # global rio
+    # global nio_cursor
     doc = rio.read_sentence_randomly()
+    if doc is None:
+        rio.refresh()
+        doc = rio.read_sentence_randomly()
+
     return json.dumps({"text": doc["text"]})
 
 

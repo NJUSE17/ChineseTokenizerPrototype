@@ -3,7 +3,7 @@ from flask import request
 from flask import send_from_directory
 from flask import send_file
 
-from IO import RemoteIO
+from IO import RemoteIO, NotationIO
 from Network import CorpusGraph
 from Network import TextGraph
 from ResultReference import JiebaChecker, ThulacChecker
@@ -42,10 +42,37 @@ def load_ref(loadfile):
     return send_from_directory(os.path.join(app.root_path, 'presentation'), loadfile)
 
 
+nio = NotationIO()
+nio_cursor = nio.get_raw_randomly()
+
+
+@app.route('/notation', methods=['GET'])
+def notation_page():
+    return load_ref("notation.html")
+
+
+@app.route('/notation/get-sentence', methods=['GET'])
+def get_notation_sentence():
+    return json.dumps(next(nio_cursor))
+
+
+@app.route('/notation/submit-notation', methods=['POST'])
+def submit_notation_sentence():
+    noted = request.get_json()
+    nio.move_to_train(noted)
+    return json.dumps({"msg": "done"})
+
+
 # 随机获取句子
 @app.route('/sentence-for-analyse', methods=['GET', 'PST'])
 def get_sentence_randomly():
+    # global rio
+    # global nio_cursor
     doc = rio.read_sentence_randomly()
+    if doc is None:
+        rio.refresh()
+        doc = rio.read_sentence_randomly()
+
     return json.dumps({"text": doc["text"]})
 
 
@@ -98,5 +125,6 @@ def tokenize():
 
 
 if __name__ == '__main__':
-    app.run(host="localhost", port=8000)
+    # app.run(host="localhost", port=8000)
+    app.run(host="192.168.68.11", port=8000)
 # end

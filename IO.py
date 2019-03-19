@@ -1,18 +1,20 @@
-import re
-from pymongo import MongoClient
-import random
 import json
+import random
+
+from pymongo import MongoClient
+
 from utl import count as time_counter
+from utl import info
 
 
 class NotationIO:
     def __init__(self):
-        # self.test_db = MongoClient("192.168.68.11", 20000).get_database("tokenizer_qiao").get_collection('sentences_sample')
-        self.test_db = MongoClient("192.168.68.11", 20000).get_database("tokenizer_qiao").get_collection(
+        # self.test_db = MongoClient("172.19.241.248", 20000).get_database("tokenizer_qiao").get_collection('sentences_sample')
+        self.test_db = MongoClient("172.19.241.248", 20000).get_database("tokenizer_qiao").get_collection(
             'sentence4test')
         self.test_size = self.test_db.find().count()
         self.test_cursor = self.test_db.find()
-        self.train_db = MongoClient("192.168.68.11", 20000).get_database("tokenizer_qiao").get_collection(
+        self.train_db = MongoClient("172.19.241.248", 20000).get_database("tokenizer_qiao").get_collection(
             'sentence4train')
 
     def get_raw_randomly(self):
@@ -29,7 +31,8 @@ class RemoteIO:
     def __init__(self):
         time_counter(print_to_console=False)
         print("初始化 RemoteIO")
-        self.db = MongoClient('192.168.68.11', 20000).get_database("tokenizer_qiao").get_collection('splited_sentences')
+        self.db = MongoClient('172.19.241.248', 20000).get_database("tokenizer_qiao").get_collection(
+            'splited_sentences')
         self.sentence_size = self.db.find().count()
         self.step = self.sentence_size
         self.skip = 0
@@ -72,7 +75,7 @@ class CorpusIO:
 
     # 从数据库构造语料库
     def read_from_mongo(self, limit=20):
-        db = self.db if self.db is not None else MongoClient('192.168.68.11', 20000).get_database(
+        db = self.db if self.db is not None else MongoClient('172.19.241.248', 20000).get_database(
             'tokenizer_qiao').get_collection('edges')
         cursor = db.find({})
         cnt = 0
@@ -81,7 +84,7 @@ class CorpusIO:
                 break
             cnt += 1
             if cnt % 10000 == 0:
-                print(cnt)
+                info("reading: %d" % cnt)
             edge = (doc['src'], doc['des'], doc['weight'])
             yield edge
 

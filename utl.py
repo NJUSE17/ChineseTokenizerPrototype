@@ -9,12 +9,28 @@ def count(label="no label", print_to_console=True):
     diff = current - previous
     previous = current
     if print_to_console:
-        print("#timer# %s：%.4fs" % (label, diff))
+        print("#timer# %s：%.7fs" % (label, diff))
     return diff
 
-#
-# timer = Timer()
-# print(timer.count())
-# for i in range(100000):
-#     x = 123+123
-# print(timer.count())
+
+def log(msg, level='DEBUG'):
+    level = level.upper()
+    if level == 'DEBUG':
+        print(msg)
+    elif level == 'INFO':
+        print("\033[1;32m%s\033[0m" % msg)
+    elif level == 'WARN':
+        print("\033[1;31m%s\033[0m" % msg)
+
+
+def info(msg):
+    log(msg, level='INFO')
+
+
+def warn(msg):
+    log(msg, level='WARN')
+
+
+conf = {
+    "mongo-ip": None
+}

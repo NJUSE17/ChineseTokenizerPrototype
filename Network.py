@@ -1,11 +1,12 @@
 import json
+from collections import Iterable
 
-from utl import count as time_count
+import networkx as nx
 
 from IO import CorpusIO
 from IO import TextIO
-import networkx as nx
 from ResultReference import is_chinese
+from utl import count as time_count
 
 
 class CorpusGraph:
@@ -15,8 +16,8 @@ class CorpusGraph:
         self.corpus_io = CorpusIO()
 
     # 需要mongodb
-    def build_corpus(self):
-        edges_gen = self.corpus_io.read_from_mongo(limit=None)
+    def build_corpus(self, size=None):
+        edges_gen = self.corpus_io.read_from_mongo(limit=size)
         for edge in edges_gen:
             self.corpus.add_edge(edge[0], edge[1], weight=edge[2])
 
@@ -52,6 +53,10 @@ class CorpusGraph:
         tmp = self.corpus
         self.corpus = self.reversed_corpus_cache
         self.reversed_corpus_cache = tmp
+
+    def cache_reverse(self):
+        if self.reversed_corpus_cache is None:
+            self.reversed_corpus_cache = self.corpus.reverse()
 
     # 对于给定的字（key），取前K个最大的后接字
     def get_sorted_neighbour(self, key, exclude=None, K=6):
@@ -107,14 +112,14 @@ class TextGraph:
         # 每句话的开头
         self.headers = []
 
-    def get_sentences(self, isRandom=True):
-        ss = self.text_io.get_text_from_mongo(isRandom=isRandom)
+    def get_sentences(self, isRandom=True, skip=0, limit=1):
+        ss = self.text_io.get_text_from_mongo(isRandom=isRandom, skip=skip, limit=limit)
         return ss
 
     def build(self, sentences):
         sentence_index = 10000
-        if type(sentences) != list:
-            raise Exception("输入应是句子列表")
+        if not isinstance(sentences, Iterable):
+            raise Exception("输入应是可迭代句子列表, 当前输入类型%s" % type(sentences))
         for s in sentences:
             s = s.strip()
             s_size = len(s)

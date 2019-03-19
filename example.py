@@ -34,18 +34,26 @@ def tokenize(sentence):
 
 def batching(parag):
     j = 0
+    count = 0
     sen_list = []
-    for i in range(len(parag)):
-        if(parag[i] == '。'):
-            print("#"+str(parag[j:i])+"#")
+    para_len = len(parag)
+    for i in range(0,para_len):
+        if(parag[j] == '。'):
+            j += 1
+            continue
+        if((parag[i] == '。')):
             sen_list.append(tokenize(parag[j:i]))
-            j = i+1
+            count += 1
+            j = i + 1
+            if count % 10000 == 0:
+                print("sen" + str(count))
+    if(parag[para_len-1] != '。'):
+        sen_list.append(tokenize(parag[j:para_len]))
+    print("sen   ok")
     return sen_list
 
 if __name__ == '__main__':
     re = DisIO()
-    # str = re.sen_from_mongo()
-    string = "上山打老虎。。老虎不在家。碰到小松鼠"
-    sen_list = batching(string)
-    print(sen_list)
-    re.re_to_text('./data/result.txt', sen_list)
+    read_sens = re.sen_from_mongo()
+    sen_list = batching(read_sens)
+    re.re_to_text(sen_list)

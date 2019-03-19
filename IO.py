@@ -124,24 +124,32 @@ class DisIO:
 
     def sen_from_mongo(self):
         cursor = self.db.find({})
-        str = ""
+        count = 0
+        sen_all = ""
         for sen in cursor:
-            str = str + sen['text']
-        return str
+            sen_all = sen_all + sen['text']
+            count += 1
+            if count % 10000 == 0:
+                print("mongo" + str(count))
+        return sen_all
 
-    def re_to_text(self, path, cut=[]):
-        jieba_sum = 0.0
-        thulac_sum = 0.0
-        dis = open(path, 'a', encoding='utf-8')
+    def re_to_text(self,cut):
         length = len(cut)
-        for i in range(0, length):
-            jieba_sum += cut[i]["jieba_overlap"]
-            thulac_sum += cut[i]["thulac_overlap"]
-            dis.write("origin: " + cut[i]["sentence"] + "\n")
-            dis.write("result: " + str(cut[i]["result"]) + "\n")
-            dis.write("jieba:  " + str(cut[i]["jieba"]) + "  " + str(cut[i]["jieba_overlap"]) + "\n")
-            dis.write("thulac: " + str(cut[i]["thulac"]) + "  " + str(cut[i]["thulac_overlap"]) + "\n\n")
-        dis.write(
-            "jieba:" + "n/a" if length == 0 else str(jieba_sum / length) + "  thulac:" + "n/a" if length == 0 else str(
-                thulac_sum / length) + "\n")
-        dis.close()
+        if(length == 0):
+            print("NO Results")
+        else:
+            jieba_sum = 0.0
+            thulac_sum = 0.0
+            # dis = open(path, 'a', encoding='utf-8')
+            for i in range(0, length):
+                if i % 10000 == 0:
+                    print("dis"+ str(i))
+                jieba_sum += cut[i]["jieba_overlap"]
+                thulac_sum += cut[i]["thulac_overlap"]
+            print("jieba:" + str(jieba_sum / length) + "  thulac:" + str(thulac_sum / length)+"\n")
+                # dis.write(str(i+1)+" origin: " + cut[i]["sentence"]+"\n")
+                # dis.write("result: " + str(cut[i]["result"])+"\n")
+                # dis.write("jieba:  " + str(cut[i]["jieba"]) + "  " + str(cut[i]["jieba_overlap"])+"\n")
+                # dis.write("thulac: " + str(cut[i]["thulac"]) + "  " + str(cut[i]["thulac_overlap"])+"\n\n")
+            # dis.write("jieba:" + str(jieba_sum / length) + "  thulac:" + str(thulac_sum / length)+"\n")
+            # dis.close()
